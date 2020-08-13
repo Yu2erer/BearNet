@@ -2,7 +2,7 @@
 #define BEARNET_BASE_LOG_H
 
 #include <cstring>
-
+#include <cstdio>
 
 namespace BearNet {
 
@@ -15,6 +15,12 @@ namespace BearNet {
                             __LINE__, errno, ##__VA_ARGS__)
 
 #define LogTrace(format, ...) printf("[%s][%s][%d]: " format "\n", __FILENAME__, __FUNCTION__,\
+                            __LINE__, ##__VA_ARGS__)
+
+#define LogErr(format, ...) printf("[%s][%s][%d]: " format "\n", __FILENAME__, __FUNCTION__,\
+                            __LINE__, ##__VA_ARGS__)
+
+#define LogDebug(format, ...) printf("[%s][%s][%d]: " format "\n", __FILENAME__, __FUNCTION__,\
                             __LINE__, ##__VA_ARGS__)
 
 

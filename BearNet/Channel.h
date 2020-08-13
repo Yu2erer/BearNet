@@ -70,7 +70,7 @@ public:
 
 private:
     const int m_fd;
-    std::unique_ptr<Poller> m_ptrPoller;
+    Poller* m_ptrPoller;
     uint32_t m_events;
     uint32_t m_revents;
     InPollerStatus m_inPollerStatus;

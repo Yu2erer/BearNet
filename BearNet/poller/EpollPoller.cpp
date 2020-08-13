@@ -89,7 +89,6 @@ Exit0:
 void EpollPoller::UpdateChannel(Channel* channel) {
     auto status = channel->GetInPollerStatus();
     int fd = channel->Getfd();
-    LogTrace("fd = %d", fd);
 
     // 新创建 或者 被删除
     if (status == Channel::InPollerStatus::IN_POLLER_NEW 
@@ -102,7 +101,7 @@ void EpollPoller::UpdateChannel(Channel* channel) {
             assert(m_channels.find(fd) != m_channels.end());
             assert(m_channels[fd] == channel);
         }
-
+        LogTrace("New Channel fd = %d", fd);
         channel->SetInPollerStatus(Channel::InPollerStatus::IN_POLLER_ADDED);
         _UpdateEvent(EPOLL_CTL_ADD, channel);
 
@@ -114,8 +113,10 @@ void EpollPoller::UpdateChannel(Channel* channel) {
         // 没有事件就删除
         if (channel->IsNoneEvent()) {
             _UpdateEvent(EPOLL_CTL_DEL, channel);
+            LogTrace("Delete Channel fd = %d", fd);
             channel->SetInPollerStatus(Channel::InPollerStatus::IN_POLLER_DELETED);
         } else {
+            LogTrace("Update Channel fd = %d", fd);
             _UpdateEvent(EPOLL_CTL_MOD, channel);
         }
     }

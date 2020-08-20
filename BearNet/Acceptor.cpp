@@ -3,7 +3,7 @@
 
 using namespace BearNet;
 
-Acceptor::Acceptor(Poller* poller, std::string ip, uint16_t port) 
+Acceptor::Acceptor(Poller* poller, const std::string& ip, uint16_t port) 
     : m_acceptSocket(SocketHelper::Create()), 
       m_acceptChannel(m_acceptSocket, poller),
       m_ip(ip),

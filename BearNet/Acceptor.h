@@ -14,11 +14,11 @@ class Acceptor : private Noncopyable {
 public:
     typedef std::function<void (Socket sock)> NewConnectionCallBack;
 
-    Acceptor(Poller* poller, std::string ip, uint16_t port);
+    Acceptor(Poller* poller, const std::string& ip, uint16_t port);
     ~Acceptor();
 public:
     bool Listen();
-    // Todo: 需要注意一下
+
     void SetNewConnectionCallBack(const NewConnectionCallBack& callBack) {
         m_newConnectionCallBack = callBack;
     }

@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <sys/types.h>
 
-#include "BearNet/base/Noncopyable.h"
-
 namespace BearNet {
 
 typedef int Socket;

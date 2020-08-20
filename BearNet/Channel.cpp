@@ -30,24 +30,27 @@ void Channel::_Update() {
 }
 
 void Channel::HandleEvent() {
-    if (m_revents & POLLHUP) {
+    if (m_revents & POLLHUP && !(m_revents & POLLIN)) {
         LogTrace("POLLHUP");
         if (m_closeCallBack) {
             m_closeCallBack();
         }
     }
-    if (m_revents & POLLERR) {
-        LogTrace("POLLERR");
+
+    if (m_revents & (POLLERR | POLLNVAL)) {
+        LogTrace("POLLERR | POLLNVAL");
         if (m_errorCallBack) {
             m_errorCallBack();
         }
     }
+
     if (m_revents & POLLIN) {
         LogTrace("POLLIN");
         if (m_readCallBack) {
             m_readCallBack();
         }
     }
+    
     if (m_revents & POLLOUT) {
         LogTrace("POLLOUT");
         if (m_writeCallBack) {

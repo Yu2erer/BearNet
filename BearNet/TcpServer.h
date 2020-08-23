@@ -24,6 +24,7 @@ public:
     void SetMessageCallback(const MessageCallBack& callBack) {
         m_messageCallBack = callBack;
     }
+    void SetMessageCodec();
 private:
     void _NewConnection(Socket sock);
     void _DeleteConnection(const TcpConnPtr&);

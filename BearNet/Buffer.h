@@ -16,6 +16,7 @@ public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
     ssize_t ReadFd(int fd);
+    void Append(const char* data, size_t size);
 public:
     char* GetWritePtr() { return _Begin() + m_writeIndex; }
     const char* GetWritePtr() const { return _Begin() + m_writeIndex; }
@@ -29,7 +30,6 @@ private:
     char* _Begin() { return m_bufVec.data(); }
     const char* _Begin() const { return m_bufVec.data(); }
     size_t _BufSize() const { return m_bufVec.size(); }
-    void _Extend(const char* data, size_t size);
     void _MakeSpace(size_t size);
 private:
     std::vector<char> m_bufVec;

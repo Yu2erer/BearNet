@@ -1,19 +1,32 @@
 #include <iostream>
+#include <cstring>
 
 #include "BearNet/TcpServer.h"
 #include "BearNet/poller/EpollPoller.h"
 #include "BearNet/Channel.h"
 #include "BearNet/Buffer.h"
+#include "BearNet/codec/Codec.h"
 
 using namespace BearNet;
 using namespace std;
 
 
 void onMessage(const TcpConnPtr conn, Buffer* buf) {
-    string message = string(buf->GetReadPtr(), buf->GetReadSize());
-    buf->Write(buf->GetReadSize());
-    printf("onMessage(): [%s]\n", message.c_str());
+    // string message(buf->GetReadPtr(), buf->GetReadSize());
+    // buf->Write(buf->GetReadSize());
+    // 学习解包
+    // printf("onMessage(): [%s], size: %d\n", message.c_str(), message.size());
+    DefaultNetPackHeader header;
+    const char* raw = buf->GetReadPtr();
+    const size_t size = buf->GetReadSize();
+    buf->Write(size);
 
+    memcpy(&header, raw, sizeof(header));
+    cout << "Header.tag: " << header.tag << "; Header.size: "  << header.size << "; Header.cmd: " << header.cmd;
+    cout << endl;
+    string msg(raw + sizeof(header), header.size);
+    cout << "Msg: " << msg << endl;
+    conn->Send("Hello");
 }
 
 

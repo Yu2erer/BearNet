@@ -2,6 +2,7 @@
 #include "BearNet/Channel.h"
 
 #include "BearNet/base/Log.h"
+#include "BearNet/codec/Codec.h"
 
 using namespace BearNet;
 
@@ -42,6 +43,34 @@ void TcpConn::ConnDestroyed() {
     m_ptrChannel->Remove();
 }
 
+void TcpConn::ShutDown() {
+
+}
+
+void TcpConn::Send(const std::string& message) {
+    // m_sendBuf.Append(message.data(), message.size());
+    // 这里做个简单的封包 测试
+    char codecBuf[65536] = {0};
+    uint8_t codecHeaderSize = sizeof(DefaultNetPackHeader);
+
+    memcpy(codecBuf + codecHeaderSize, message.data(), message.size());
+
+
+    DefaultNetPackHeader header;
+    std::string tag = "Bear";
+    memcpy(header.tag, tag.c_str(), sizeof(header.tag));
+
+    header.cmd = 111;
+    header.size = message.size() + codecHeaderSize - sizeof(header.tag) - sizeof(header.size);
+    
+    memcpy(codecBuf, &header, codecHeaderSize);
+
+    m_sendBuf.Append(codecBuf, codecHeaderSize + message.size());
+    if (!m_ptrChannel->IsWriting()) {
+        m_ptrChannel->EnableWriting();
+    }
+}
+
 void TcpConn::_HandleRead() {
     ssize_t n = m_recvBuf.ReadFd(m_ptrChannel->Getfd());
     if (n > 0) {
@@ -77,7 +106,21 @@ void TcpConn::_HandleRead() {
 }
 
 void TcpConn::_HandleWrite() {
-
+    if (!m_ptrChannel->IsWriting()) {
+        LogTrace("TcpConn is down");
+        return;
+    }
+    ssize_t n = SocketHelper::Send(m_ptrChannel->Getfd(), m_sendBuf.GetReadPtr(), m_sendBuf.GetReadSize());
+    if (n > 0) {
+        m_sendBuf.Write(n);
+        if (m_sendBuf.GetReadSize() == 0) {
+            m_ptrChannel->DisableWriting();
+        } else {
+            LogTrace("还能写更多");
+        }
+    } else {
+        LogErr("TcpConn::_HandleWrite()");
+    }
 }
 
 void TcpConn::_HandleClose() {

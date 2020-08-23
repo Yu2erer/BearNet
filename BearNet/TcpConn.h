@@ -17,7 +17,8 @@ public:
     TcpConn(Poller* poller, Socket sock);
     ~TcpConn();
 public:
-    bool Send(const char *buf, uint32_t len);
+    void Send(const std::string& message);
+    void ShutDown();
     void ConnEstablished();
     void ConnDestroyed();
 public:

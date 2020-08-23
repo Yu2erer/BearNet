@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "BearNet/TcpServer.h"
 #include "BearNet/base/Log.h"
 #include "BearNet/Acceptor.h"
@@ -15,7 +17,11 @@ TcpServer::TcpServer(Poller *poller, const std::string& ip, uint16_t port)
 
 
 TcpServer::~TcpServer() {
-
+    for (auto& item : m_connMap) {
+        item.second->ConnDestroyed();
+        item.second.reset();
+    }
+    m_connMap.clear();
 }
 
 
@@ -28,6 +34,15 @@ void TcpServer::_NewConnection(Socket sock) {
     LogDebug("TcpServer New Connection");
     TcpConnPtr conn(new TcpConn(m_ptrPoller, sock));
     conn->SetMessageCallBack(m_messageCallBack);
+    conn->SetCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
+    // 存储起来, 避免 conn 的引用计数为 0 被销毁
+    m_connMap[conn->GetID()] = conn;
     conn->ConnEstablished();
-    m_vec.push_back(conn);
+}
+
+void TcpServer::_DeleteConnection(const TcpConnPtr& conn) {
+    conn->ConnDestroyed();
+    auto n = m_connMap.erase(conn->GetID());
+    (void)n;
+    assert(n == 1);
 }

@@ -7,6 +7,7 @@ set(BearNetSrc
     Acceptor.cpp
     TcpConn.cpp
     TcpServer.cpp
+    Buffer.cpp
 )
 
 add_library(BearNet ${BearNetSrc})

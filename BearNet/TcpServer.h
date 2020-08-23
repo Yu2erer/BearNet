@@ -1,7 +1,7 @@
 #ifndef BEARNET_TCPSERVER_H
 #define BEARNET_TCPSERVER_H
 
-#include <vector>
+#include <unordered_map>
 
 #include "BearNet/TcpConn.h"
 
@@ -12,8 +12,6 @@ class Acceptor;
 
 class TcpServer : private Noncopyable {
 public:
-    typedef std::function<void (const TcpConn&)> ConnectionCallBack;
-
     TcpServer(Poller *poller, const std::string& ip, uint16_t port);
     ~TcpServer();
 public:
@@ -28,6 +26,7 @@ public:
     }
 private:
     void _NewConnection(Socket sock);
+    void _DeleteConnection(const TcpConnPtr&);
 private:
     Poller* m_ptrPoller;
     std::string m_ip;
@@ -35,9 +34,8 @@ private:
     std::unique_ptr<Acceptor> m_ptrAcceptor;
     ConnectionCallBack m_connectionCallBack;
     MessageCallBack m_messageCallBack;
-    // 临时 只是为了避免 TcpConnPtr 离开生命期 自动销毁
-    // 正常 也应该做一个 TcpConn 的 map
-    std::vector<TcpConnPtr> m_vec;
+    // TcpConnPtr 引用, 移除出去时, 有可能会销毁
+    std::unordered_map<uint64_t, TcpConnPtr> m_connMap;
 };
 
 

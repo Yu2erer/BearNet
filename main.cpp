@@ -3,13 +3,17 @@
 #include "BearNet/TcpServer.h"
 #include "BearNet/poller/EpollPoller.h"
 #include "BearNet/Channel.h"
+#include "BearNet/Buffer.h"
 
 using namespace BearNet;
 using namespace std;
 
 
-void onMessage(const TcpConnPtr conn, char* buf, int n) {
-    cout << "On Message: received " << n << " bytes, data: " << buf << endl;
+void onMessage(const TcpConnPtr conn, Buffer* buf) {
+    string message = string(buf->GetReadPtr(), buf->GetReadSize());
+    buf->Write(buf->GetReadSize());
+    printf("onMessage(): [%s]\n", message.c_str());
+
 }
 
 
@@ -25,16 +29,16 @@ int main() {
     Poller::ChannelList activeChannelList;
     for (;;) {
         activeChannelList.clear();
-        poller->Poll(false, true, activeChannelList, 10000);
+        poller->Poll(false, true, activeChannelList, -1);
         for (auto channel : activeChannelList) {
             channel->HandleEvent();
         }
 
-        activeChannelList.clear();
-        poller->Poll(true, false, activeChannelList, 10000);
-        for (auto channel : activeChannelList) {
-            channel->HandleEvent();
-        }
+        // activeChannelList.clear();
+        // poller->Poll(true, false, activeChannelList, -1);
+        // for (auto channel : activeChannelList) {
+            // channel->HandleEvent();
+        // }
     }
     return 0;
 }

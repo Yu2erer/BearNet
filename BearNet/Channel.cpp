@@ -22,6 +22,7 @@ Channel::~Channel() {
 }
 
 void Channel::Remove() {
+    assert(IsNoneEvent());
     m_ptrPoller->DeleteChannel(this);
 }
 

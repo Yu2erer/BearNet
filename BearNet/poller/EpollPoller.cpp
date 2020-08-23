@@ -126,10 +126,14 @@ void EpollPoller::DeleteChannel(Channel* channel) {
     int fd = channel->Getfd();
     LogTrace("fd = %d", fd);
     
-    int status = channel->GetInPollerStatus();
+    Channel::InPollerStatus status = channel->GetInPollerStatus();
     size_t n = m_channels.erase(fd);
     (void)n;
-    _UpdateEvent(EPOLL_CTL_DEL, channel);
+    // 只有在中间状态 才会真正执行删除
+    if (status == Channel::InPollerStatus::IN_POLLER_ADDED) {
+        _UpdateEvent(EPOLL_CTL_DEL, channel);
+    }
+    channel->SetInPollerStatus(Channel::InPollerStatus::IN_POLLER_NEW);
 }
 
 

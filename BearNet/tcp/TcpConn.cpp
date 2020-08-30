@@ -1,4 +1,4 @@
-#include "BearNet/TcpConn.h"
+#include "BearNet/tcp/TcpConn.h"
 #include "BearNet/Channel.h"
 
 #include "BearNet/base/Log.h"
@@ -50,6 +50,7 @@ void TcpConn::ShutDown() {
 void TcpConn::Send(const std::string& message) {
     // m_sendBuf.Append(message.data(), message.size());
     // 这里做个简单的封包 测试
+
     char codecBuf[65536] = {0};
     uint8_t codecHeaderSize = sizeof(DefaultNetPackHeader);
 

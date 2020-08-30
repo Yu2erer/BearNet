@@ -1,13 +1,13 @@
 
 set(BearNetSrc
     Channel.cpp
+    Socket.cpp
+    Buffer.cpp
     poller/Poller.cpp
     poller/EpollPoller.cpp
-    Socket.cpp
-    Acceptor.cpp
-    TcpConn.cpp
-    TcpServer.cpp
-    Buffer.cpp
+    tcp/Acceptor.cpp
+    tcp/TcpConn.cpp
+    tcp/TcpServer.cpp
 )
 
 add_library(BearNet ${BearNetSrc})

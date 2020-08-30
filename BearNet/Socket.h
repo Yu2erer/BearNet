@@ -2,6 +2,7 @@
 #define BEARNET_SOCKET_H
 
 #include <cstdint>
+#include <string>
 #include <sys/types.h>
 
 namespace BearNet {

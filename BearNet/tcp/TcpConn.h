@@ -2,9 +2,9 @@
 #define BEARNET_TCPCONN_H
 
 #include "BearNet/base/Noncopyable.h"
-#include "BearNet/TcpCommon.h"
 #include "BearNet/Socket.h"
 #include "BearNet/Buffer.h"
+#include "BearNet/tcp/TcpCommon.h"
 
 namespace BearNet {
 

@@ -31,8 +31,8 @@ private:
 private:
     typedef std::vector<struct epoll_event> EventList;
 
-    int m_readEpollfd;
-    int m_writeEpollfd;
+    const int m_readEpollfd;
+    const int m_writeEpollfd;
     EventList m_readEvents;
     EventList m_writeEvents;
 };

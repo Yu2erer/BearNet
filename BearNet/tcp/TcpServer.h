@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include "BearNet/TcpConn.h"
+#include "BearNet/tcp/TcpConn.h"
 
 namespace BearNet {
 

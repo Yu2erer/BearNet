@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstring>
 
-#include "BearNet/TcpServer.h"
+#include "BearNet/tcp/TcpServer.h"
 #include "BearNet/poller/EpollPoller.h"
 #include "BearNet/Channel.h"
 #include "BearNet/Buffer.h"

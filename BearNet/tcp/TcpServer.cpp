@@ -1,8 +1,8 @@
 #include <assert.h>
 
-#include "BearNet/TcpServer.h"
 #include "BearNet/base/Log.h"
-#include "BearNet/Acceptor.h"
+#include "BearNet/tcp/TcpServer.h"
+#include "BearNet/tcp/Acceptor.h"
 
 using namespace BearNet;
 

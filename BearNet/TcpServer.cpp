@@ -7,10 +7,11 @@
 using namespace BearNet;
 
 
-TcpServer::TcpServer(Poller *poller, const std::string& ip, uint16_t port)
+TcpServer::TcpServer(Poller *poller, const std::string& ip, uint16_t port, size_t bufferSize)
     : m_ptrPoller(poller),
       m_ip(ip),
       m_port(port),
+      m_bufferSize(bufferSize),
       m_ptrAcceptor(new Acceptor(m_ptrPoller, m_ip, m_port)) {
     m_ptrAcceptor->SetNewConnectionCallBack(std::bind(&TcpServer::_NewConnection, this, std::placeholders::_1));
 }
@@ -32,7 +33,7 @@ void TcpServer::Start() {
 
 void TcpServer::_NewConnection(int fd) {
     LogDebug("TcpServer New Connection");
-    TcpConnPtr conn(new TcpConn(m_ptrPoller, fd));
+    TcpConnPtr conn(new TcpConn(m_ptrPoller, fd, m_bufferSize));
     conn->SetMessageCallBack(m_messageCallBack);
     conn->SetCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
     // 存储起来, 避免 conn 的引用计数为 0 被销毁

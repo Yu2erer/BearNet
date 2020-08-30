@@ -11,7 +11,7 @@ public:
     explicit Buffer(size_t initSize, const int fd) 
         : m_bufVec(initSize),
           m_fd(fd) { }
-    ~Buffer() { }
+    ~Buffer() = default;
 public:
     ssize_t ReadFd();
     ssize_t WriteFd();

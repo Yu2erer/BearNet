@@ -14,7 +14,7 @@ class Poller;
 class TcpConn : private Noncopyable, 
     public std::enable_shared_from_this<TcpConn> {
 public:
-    TcpConn(Poller* poller, const int fd);
+    TcpConn(Poller* poller, const int fd, size_t bufferSize);
     ~TcpConn();
 public:
     void Send(const std::string& message);

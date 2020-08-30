@@ -7,13 +7,12 @@
 using namespace BearNet;
 
 
-TcpConn::TcpConn(Poller* poller, const int fd)
+TcpConn::TcpConn(Poller* poller, const int fd, size_t bufferSize)
     : m_ptrPoller(poller),
       m_fd(fd),
       m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
-      // Todo: 缓冲区大小应该在 tcpServer 中可配置
-      m_recvBuf(10, m_fd),
-      m_sendBuf(10, m_fd) {
+      m_recvBuf(bufferSize, m_fd),
+      m_sendBuf(bufferSize, m_fd) {
 
     static uint64_t id = 0;
     m_id = ++ id;
@@ -39,6 +38,7 @@ void TcpConn::ConnEstablished() {
 void TcpConn::ConnDestroyed() {
     LogTrace("TcpConn::ConnDestroyed()");
     // Todo: 根据conn状态决定 disableAll()
+    // 因为很有可能会直接调用这个函数 而不先从poll中删除
     // m_ptrChannel->DisableAll();
     m_ptrChannel->Remove();
 }

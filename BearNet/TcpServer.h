@@ -12,7 +12,7 @@ class Acceptor;
 
 class TcpServer : private Noncopyable {
 public:
-    TcpServer(Poller *poller, const std::string& ip, uint16_t port);
+    TcpServer(Poller *poller, const std::string& ip, uint16_t port, size_t bufferSize = 10);
     ~TcpServer();
 public:
     void Start();
@@ -32,6 +32,7 @@ private:
     Poller* m_ptrPoller;
     std::string m_ip;
     uint16_t m_port;
+    size_t m_bufferSize;
     std::unique_ptr<Acceptor> m_ptrAcceptor;
     ConnectionCallBack m_connectionCallBack;
     MessageCallBack m_messageCallBack;

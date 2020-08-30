@@ -6,30 +6,26 @@
 
 namespace BearNet {
 
-typedef int Socket;
-
 #ifndef InvalidSocket
 #define InvalidSocket -1
 #endif
 
-class SocketHelper {
+class SocketUtils {
 public:
     // 默认设置 NoDelay 和 NoBlock
-    static Socket Create();
-    static bool Listen(Socket sock, std::string ip, uint16_t port);
-    static Socket Accept(Socket listenSock);
-    static ssize_t Send(Socket sock, const char *buf, uint32_t size);
-    static ssize_t Recv(Socket sock, char *buf, uint32_t size);
+    static int Create();
+    static bool Listen(int fd, const std::string& ip, uint16_t port);
+    static int Accept(int listenFd);
     
-    static bool Shutdown(Socket sock, int how);
-    static void Close(Socket sock);
+    static bool Shutdown(int fd, int how);
+    static void Close(int fd);
 
-    static bool SetNoDelay(Socket sock, int flag = 1);
-    static bool SetReuse(Socket sock);
-    static bool SetKeepAlive(Socket sock, uint32_t keepAliveTime = 60);
+    static bool SetNoDelay(int fd, int flag = 1);
+    static bool SetReuse(int fd);
+    static bool SetKeepAlive(int fd, uint32_t keepAliveTime = 60);
 public:
-    SocketHelper() = delete;
-    ~SocketHelper() = delete;
+    SocketUtils() = delete;
+    ~SocketUtils() = delete;
 };
 
 }

@@ -4,8 +4,8 @@
 using namespace BearNet;
 
 Acceptor::Acceptor(Poller* poller, const std::string& ip, uint16_t port) 
-    : m_acceptSocket(SocketHelper::Create()), 
-      m_acceptChannel(m_acceptSocket, poller),
+    : m_acceptFd(SocketUtils::Create()), 
+      m_acceptChannel(m_acceptFd, poller),
       m_ip(ip),
       m_port(port) {
     m_acceptChannel.SetReadCallBack(std::bind(&Acceptor::_HandleRead, this));
@@ -18,7 +18,7 @@ Acceptor::~Acceptor() {
 }
 
 bool Acceptor::Listen() {
-    bool ret = SocketHelper::Listen(m_acceptSocket, m_ip, m_port);
+    bool ret = SocketUtils::Listen(m_acceptFd, m_ip, m_port);
     if (!ret) {
         return false;
     }
@@ -27,12 +27,12 @@ bool Acceptor::Listen() {
 }
 
 void Acceptor::_HandleRead() {
-    Socket sock = SocketHelper::Accept(m_acceptSocket);
-    if (sock != InvalidSocket) {
+    int fd = SocketUtils::Accept(m_acceptFd);
+    if (fd != InvalidSocket) {
         if (m_newConnectionCallBack) {
-            m_newConnectionCallBack(sock);
+            m_newConnectionCallBack(fd);
         } else {
-            SocketHelper::Close(sock);
+            SocketUtils::Close(fd);
         }
     } else {
         LogErr("Acceptor::_HandleRead() Accept fail.");

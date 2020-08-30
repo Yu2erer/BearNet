@@ -2,20 +2,22 @@
 #define BEARNET_BUFFER_H
 
 #include <vector>
-#include <assert.h>
 #include <sys/types.h>
 
 namespace BearNet {
 
 class Buffer {
 public:
-    explicit Buffer(size_t initSize) 
-        : m_bufVec(initSize) { }
+    explicit Buffer(size_t initSize, const int fd) 
+        : m_bufVec(initSize),
+          m_fd(fd) { }
     ~Buffer() { }
+public:
+    ssize_t ReadFd();
+    ssize_t WriteFd();
 public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
-    ssize_t ReadFd(int fd);
     void Append(const char* data, size_t size);
 public:
     char* GetWritePtr() { return _Begin() + m_writeIndex; }
@@ -33,6 +35,7 @@ private:
     void _MakeSpace(size_t size);
 private:
     std::vector<char> m_bufVec;
+    const int m_fd;
     size_t m_readIndex;
     size_t m_writeIndex;
 };

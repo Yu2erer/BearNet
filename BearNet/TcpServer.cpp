@@ -30,9 +30,9 @@ void TcpServer::Start() {
 }
 
 
-void TcpServer::_NewConnection(Socket sock) {
+void TcpServer::_NewConnection(int fd) {
     LogDebug("TcpServer New Connection");
-    TcpConnPtr conn(new TcpConn(m_ptrPoller, sock));
+    TcpConnPtr conn(new TcpConn(m_ptrPoller, fd));
     conn->SetMessageCallBack(m_messageCallBack);
     conn->SetCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
     // 存储起来, 避免 conn 的引用计数为 0 被销毁

@@ -14,7 +14,7 @@ class Poller;
 class TcpConn : private Noncopyable, 
     public std::enable_shared_from_this<TcpConn> {
 public:
-    TcpConn(Poller* poller, Socket sock);
+    TcpConn(Poller* poller, const int fd);
     ~TcpConn();
 public:
     void Send(const std::string& message);
@@ -39,7 +39,7 @@ private:
     uint64_t m_id;
     Poller* m_ptrPoller;
     // 析构的时候 应当 close
-    Socket m_sock;
+    const int m_fd;
     std::unique_ptr<Channel> m_ptrChannel;
     MessageCallBack m_messageCallBack;
     CloseCallBack m_closeCallBack;

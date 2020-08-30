@@ -12,25 +12,25 @@
 
 using namespace BearNet;
 
-// Todo: 支持 ipv6
-Socket SocketHelper::Create() {
-    Socket sock = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
-    if (sock != InvalidSocket) {
-        if (!SetNoDelay(sock)) {
-            Close(sock);
-            sock = InvalidSocket;
+
+int SocketUtils::Create() {
+    int fd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+    if (fd != InvalidSocket) {
+        if (!SetNoDelay(fd)) {
+            Close(fd);
+            fd = InvalidSocket;
         }
 
     } else {
-        LogErr("SocketHelper::Create() Get Socket fail.");
+        LogErr("SocketUtils::Create() Get Socket fail.");
     }
-    return sock;
+    return fd;
 }
 
-bool SocketHelper::Listen(Socket sock, std::string ip, uint16_t port) {
-    assert(sock != InvalidSocket);
+bool SocketUtils::Listen(int fd, const std::string& ip, uint16_t port) {
+    assert(fd != InvalidSocket);
     // 地址重用
-    if (!SetReuse(sock)) {
+    if (!SetReuse(fd)) {
         return false;
     }
     
@@ -42,103 +42,68 @@ bool SocketHelper::Listen(Socket sock, std::string ip, uint16_t port) {
     addr4->sin_addr.s_addr = inet_addr(ip.c_str());
     int addrSize = sizeof(struct sockaddr_in);
     
-    int ret = ::bind(sock, &addr, addrSize);
+    int ret = ::bind(fd, &addr, addrSize);
     if (ret < 0) {
-        LogSysErr("SocketHelper::Listen() Bind Socket fail.");
+        LogSysErr("SocketUtils::Listen() Bind Socket fail.");
         return false;
     }
-    ret = ::listen(sock, 512);
+    ret = ::listen(fd, 512);
     if (ret < 0) {
-        LogSysErr("SocketHelper::Listen() Listen Socket fail.");
+        LogSysErr("SocketUtils::Listen() Listen Socket fail.");
         return false;
     }
     return true;
 }
 
-bool SocketHelper::Shutdown(Socket sock, int how) {
-    assert(sock != InvalidSocket);
+bool SocketUtils::Shutdown(int fd, int how) {
+    assert(fd != InvalidSocket);
 
-    int ret = shutdown(sock, how);
+    int ret = shutdown(fd, how);
     if (ret < 0) {
-        LogSysErr("SocketHelper::Shutdown() Socket fail.");
+        LogSysErr("SocketUtils::Shutdown() Socket fail.");
         return false;
     }
-    LogDebug("Shutdown Socket = %d", sock);
+    LogDebug("Shutdown Socket = %d", fd);
 
     return true;
 }
 
-Socket SocketHelper::Accept(Socket listenSock) {
-    assert(listenSock != InvalidSocket);
+int SocketUtils::Accept(int listenFd) {
+    assert(listenFd != InvalidSocket);
     struct sockaddr addr;
     socklen_t addrSize = static_cast<socklen_t>(sizeof(addr));
 
-    Socket sock = ::accept4(listenSock, &addr,
+    int fd = ::accept4(listenFd, &addr,
                         &addrSize, SOCK_NONBLOCK | SOCK_CLOEXEC);
-    if (sock == InvalidSocket) {
-        LogSysErr("SocketHelper::Accept() Accept fail.");
+    if (fd == InvalidSocket) {
+        LogSysErr("SocketUtils::Accept() Accept fail.");
     }
-    return sock;
+    return fd;
 }
 
-ssize_t SocketHelper::Send(Socket sock, const char *buf, uint32_t size) {
-    do {
-        ssize_t ret = write(sock, buf, size);
-        if (ret >= 0) {
-            return ret;
-        }
-        if (errno == EAGAIN) {
-            return 0;
-        } else {
-            LogSysErr("SocketHelper::Send() Send Socket = %d fail.", sock);
-            return -1;
-        }
-        
-    } while (true);
+void SocketUtils::Close(int fd) {
+    assert(fd != InvalidSocket);
+    close(fd);
+    LogDebug("Close Socket = %d", fd);
 }
 
-
-ssize_t SocketHelper::Recv(Socket sock, char *buf, uint32_t size) {
-    assert(buf != nullptr);
-
-    do {
-        ssize_t ret = read(sock, buf, size);
-        if (ret >= 0) {
-            return ret;
-        }
-        if (errno == EAGAIN) {
-            return -2;
-        } else {
-            LogSysErr("SocketHelper::Recv() Recv Socket = %d fail.", sock);
-            return -1;
-        }
-        
-    } while (true);
-}
-
-void SocketHelper::Close(Socket sock) {
-    assert(sock != InvalidSocket);
-    close(sock);
-    LogDebug("Close Socket = %d", sock);
-}
-
-bool SocketHelper::SetNoDelay(Socket sock, int flag /* =1 */ ) {
-    assert(sock != InvalidSocket);
-    int ret = ::setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(flag));
+bool SocketUtils::SetNoDelay(int fd, int flag /* =1 */ ) {
+    assert(fd != InvalidSocket);
+    int ret = ::setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(flag));
     if (ret < 0) {
-        LogErr("SocketHelper::SetNoDelay() Set Socket = %d NoDelay fail.", sock);
+        LogErr("SocketUtils::SetNoDelay() Set Socket = %d NoDelay fail.", fd);
         return false;
     }
     return true;
 }
 
-bool SocketHelper::SetReuse(Socket sock) {
-    assert(sock != InvalidSocket);
+bool SocketUtils::SetReuse(int fd) {
+    assert(fd != InvalidSocket);
 
     int flag = 1;
-    int ret = ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *) &flag, sizeof(flag));
+    int ret = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &flag, sizeof(flag));
     if (ret < 0) {
-        LogErr("SocketHelper::SetReuse() Set Socket = %d Resuse fail.", sock);
+        LogErr("SocketUtils::SetReuse() Set Socket = %d Resuse fail.", fd);
         return false;
     }
     return true;

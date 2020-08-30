@@ -26,7 +26,7 @@ public:
     }
     void SetMessageCodec();
 private:
-    void _NewConnection(Socket sock);
+    void _NewConnection(int fd);
     void _DeleteConnection(const TcpConnPtr&);
 private:
     Poller* m_ptrPoller;

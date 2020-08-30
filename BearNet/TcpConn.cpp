@@ -7,13 +7,13 @@
 using namespace BearNet;
 
 
-TcpConn::TcpConn(Poller* poller, Socket sock)
+TcpConn::TcpConn(Poller* poller, const int fd)
     : m_ptrPoller(poller),
-      m_sock(sock),
-      m_ptrChannel(new Channel(m_sock, m_ptrPoller)),
+      m_fd(fd),
+      m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
       // Todo: 缓冲区大小应该在 tcpServer 中可配置
-      m_recvBuf(10),
-      m_sendBuf(10) {
+      m_recvBuf(10, m_fd),
+      m_sendBuf(10, m_fd) {
 
     static uint64_t id = 0;
     m_id = ++ id;
@@ -29,7 +29,7 @@ TcpConn::TcpConn(Poller* poller, Socket sock)
 TcpConn::~TcpConn() {
     LogTrace("TcpConn::~TcpConn");
     m_ptrChannel->Remove();
-    SocketHelper::Close(m_sock);
+    SocketUtils::Close(m_fd);
 }
 
 void TcpConn::ConnEstablished() {
@@ -72,7 +72,7 @@ void TcpConn::Send(const std::string& message) {
 }
 
 void TcpConn::_HandleRead() {
-    ssize_t n = m_recvBuf.ReadFd(m_ptrChannel->Getfd());
+    ssize_t n = m_recvBuf.ReadFd();
     if (n > 0) {
         if (m_messageCallBack) {
             m_messageCallBack(shared_from_this(), &m_recvBuf);
@@ -80,29 +80,9 @@ void TcpConn::_HandleRead() {
     } else if (n == 0) {
         _HandleClose();
     } else {
+        LogErr("Err: %d", n);
         _HandleError();
     }
-
-    // char buf[65536];
-    // -2, > 0, 0, < 0
-    // int n = SocketHelper::Recv(m_sock, buf, sizeof(buf));
-
-    // if (n < 0) {
-    //     if (n == -2) {
-    //         // 正常
-    //         return;
-    //     }
-    //     // 错误
-    //     _HandleError();
-    // } else if (n == 0) {
-    //     // 关闭连接
-    //     _HandleClose();
-    // } else {
-    //     // 最好在这里将数据 Decode 后 再还给 TcpServer Or TcpClient
-    //     if (m_messageCallBack) {
-    //         m_messageCallBack(shared_from_this(), buf);
-    //     }
-    // }
 }
 
 void TcpConn::_HandleWrite() {
@@ -110,13 +90,14 @@ void TcpConn::_HandleWrite() {
         LogTrace("TcpConn is down");
         return;
     }
-    ssize_t n = SocketHelper::Send(m_ptrChannel->Getfd(), m_sendBuf.GetReadPtr(), m_sendBuf.GetReadSize());
+
+    ssize_t n = m_sendBuf.WriteFd();
+
     if (n > 0) {
-        m_sendBuf.Write(n);
         if (m_sendBuf.GetReadSize() == 0) {
             m_ptrChannel->DisableWriting();
         } else {
-            LogTrace("还能写更多");
+            LogTrace("还有很多可写");
         }
     } else {
         LogErr("TcpConn::_HandleWrite()");

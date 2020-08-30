@@ -12,7 +12,7 @@ namespace BearNet {
 
 class Acceptor : private Noncopyable {
 public:
-    typedef std::function<void (Socket sock)> NewConnectionCallBack;
+    typedef std::function<void (int fd)> NewConnectionCallBack;
 
     Acceptor(Poller* poller, const std::string& ip, uint16_t port);
     ~Acceptor();
@@ -25,7 +25,7 @@ public:
 private:
     void _HandleRead();
 private:
-    Socket m_acceptSocket;
+    int m_acceptFd;
     Channel m_acceptChannel;
     std::string m_ip;
     uint16_t m_port;

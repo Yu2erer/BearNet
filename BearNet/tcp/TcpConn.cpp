@@ -1,8 +1,6 @@
 #include "BearNet/tcp/TcpConn.h"
 #include "BearNet/Channel.h"
-
 #include "BearNet/base/Log.h"
-#include "BearNet/codec/Codec.h"
 
 using namespace BearNet;
 
@@ -48,25 +46,7 @@ void TcpConn::ShutDown() {
 }
 
 void TcpConn::Send(const std::string& message) {
-    // m_sendBuf.Append(message.data(), message.size());
-    // 这里做个简单的封包 测试
-
-    char codecBuf[65536] = {0};
-    uint8_t codecHeaderSize = sizeof(DefaultNetPackHeader);
-
-    memcpy(codecBuf + codecHeaderSize, message.data(), message.size());
-
-
-    DefaultNetPackHeader header;
-    std::string tag = "Bear";
-    memcpy(header.tag, tag.c_str(), sizeof(header.tag));
-
-    header.cmd = 111;
-    header.size = message.size() + codecHeaderSize - sizeof(header.tag) - sizeof(header.size);
-    
-    memcpy(codecBuf, &header, codecHeaderSize);
-
-    m_sendBuf.Append(codecBuf, codecHeaderSize + message.size());
+    m_sendBuf.Append(message.data(), message.size());
     if (!m_ptrChannel->IsWriting()) {
         m_ptrChannel->EnableWriting();
     }

@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <arpa/inet.h>
 
-#include "BearNet/Socket.h"
+#include "BearNet/SocketUtils.h"
 #include "BearNet/base/Log.h"
 
 using namespace BearNet;
@@ -55,10 +55,10 @@ bool SocketUtils::Listen(int fd, const std::string& ip, uint16_t port) {
     return true;
 }
 
-bool SocketUtils::Shutdown(int fd, int how) {
+bool SocketUtils::Shutdown(int fd) {
     assert(fd != InvalidSocket);
 
-    int ret = shutdown(fd, how);
+    int ret = ::shutdown(fd, SHUT_WR);
     if (ret < 0) {
         LogSysErr("SocketUtils::Shutdown() Socket fail.");
         return false;
@@ -109,3 +109,24 @@ bool SocketUtils::SetReuse(int fd) {
     return true;
 
 }
+
+bool SocketUtils::SetKeepAlive(int fd, uint32_t keepAliveTime) {
+    assert(fd != InvalidSocket);
+
+    // Todo: 返回值判断
+    // open keep alive
+    int optval = 1;
+    ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+    // 当多久没有数据时 发送探测
+    int keepIdle = static_cast<int>(keepAliveTime);
+    ::setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
+    // 重试间隔
+    int keepIntvl = 1;
+    ::setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, (void*)&keepIntvl, sizeof(keepIntvl));
+    // 重试次数
+    int keepCnt = 1;
+    ::setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, (void*)&keepCnt, sizeof(keepCnt));
+    
+    return true;
+}
+

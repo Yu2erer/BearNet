@@ -1,7 +1,7 @@
 
 set(BearNetSrc
     Channel.cpp
-    Socket.cpp
+    SocketUtils.cpp
     Buffer.cpp
     poller/Poller.cpp
     poller/EpollPoller.cpp

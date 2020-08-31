@@ -6,7 +6,7 @@
 
 #include "BearNet/base/Noncopyable.h"
 #include "BearNet/Channel.h"
-#include "BearNet/Socket.h"
+#include "BearNet/SocketUtils.h"
 
 namespace BearNet {
 

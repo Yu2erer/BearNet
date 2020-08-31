@@ -18,13 +18,15 @@ public:
     void Start();
     void Stop();
 public:
-    void SetConnectionCallBack(const ConnectionCallBack& callBack) {
-        m_connectionCallBack = callBack;
+    void SetConnectCallBack(const ConnectCallBack& callBack) {
+        m_connectCallBack = callBack;
+    }
+    void SetDisconnectCallBack(const DisconnectCallBack& callBack) {
+        m_disconnectCallBack = callBack;
     }
     void SetMessageCallback(const MessageCallBack& callBack) {
         m_messageCallBack = callBack;
     }
-    void SetMessageCodec();
 private:
     void _NewConnection(int fd);
     void _DeleteConnection(const TcpConnPtr&);
@@ -34,7 +36,8 @@ private:
     uint16_t m_port;
     size_t m_bufferSize;
     std::unique_ptr<Acceptor> m_ptrAcceptor;
-    ConnectionCallBack m_connectionCallBack;
+    ConnectCallBack m_connectCallBack;
+    DisconnectCallBack m_disconnectCallBack;
     MessageCallBack m_messageCallBack;
     // TcpConnPtr 引用, 移除出去时, 有可能会销毁
     std::unordered_map<uint64_t, TcpConnPtr> m_connMap;

@@ -12,7 +12,7 @@ using namespace BearNet;
 using namespace std;
 
 
-void onMessage(const TcpConnPtr conn, Buffer* buf) {
+void onMessage(const TcpConnPtr& conn, Buffer* buf) {
     DefaultCodec::instance().Decode(buf->GetReadPtr(), buf->GetReadSize());
     
     string message(buf->GetReadPtr(), buf->GetReadSize());
@@ -26,14 +26,21 @@ void onMessage(const TcpConnPtr conn, Buffer* buf) {
     conn->Send(msg);
 }
 
+void onConnect(const TcpConnPtr& conn) {
+    cout << "onConnect" << endl;
+}
 
+void onDisconnect(const TcpConnPtr& conn) {
+    cout << "onDisconnect" << endl;
+}
 
 int main() {
     std::unique_ptr<Poller> poller(new EpollPoller());
 
     TcpServer server(poller.get(), "0.0.0.0", 1234);
+    server.SetConnectCallBack(onConnect);
+    server.SetDisconnectCallBack(onDisconnect);
     server.SetMessageCallback(onMessage);
-
     server.Start();
     
     Poller::ChannelList activeChannelList;

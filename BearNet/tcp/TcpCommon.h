@@ -11,7 +11,8 @@ class TcpConn;
 class Buffer;
 
 typedef std::shared_ptr<TcpConn> TcpConnPtr;
-typedef std::function<void (const TcpConnPtr&)> ConnectionCallBack;
+typedef std::function<void (const TcpConnPtr&)> ConnectCallBack;
+typedef std::function<void (const TcpConnPtr&)> DisconnectCallBack;
 typedef std::function<void (const TcpConnPtr&, Buffer*)> MessageCallBack;
 typedef std::function<void (const TcpConnPtr&)> CloseCallBack;
 

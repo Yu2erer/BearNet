@@ -18,7 +18,7 @@ public:
     static bool Listen(int fd, const std::string& ip, uint16_t port);
     static int Accept(int listenFd);
     
-    static bool Shutdown(int fd, int how);
+    static bool Shutdown(int fd);
     static void Close(int fd);
 
     static bool SetNoDelay(int fd, int flag = 1);

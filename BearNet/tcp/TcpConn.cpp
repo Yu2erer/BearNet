@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "BearNet/tcp/TcpConn.h"
 #include "BearNet/Channel.h"
 #include "BearNet/base/Log.h"
@@ -7,6 +9,7 @@ using namespace BearNet;
 
 TcpConn::TcpConn(Poller* poller, const int fd, size_t bufferSize)
     : m_ptrPoller(poller),
+      m_state(kConnecting),
       m_fd(fd),
       m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
       m_recvBuf(bufferSize, m_fd),
@@ -14,6 +17,8 @@ TcpConn::TcpConn(Poller* poller, const int fd, size_t bufferSize)
 
     static uint64_t id = 0;
     m_id = ++ id;
+
+    SocketUtils::SetKeepAlive(m_fd);
 
     m_ptrChannel->SetReadCallBack(std::bind(&TcpConn::_HandleRead, this));
     m_ptrChannel->SetWriteCallBack(std::bind(&TcpConn::_HandleWrite, this));
@@ -24,28 +29,49 @@ TcpConn::TcpConn(Poller* poller, const int fd, size_t bufferSize)
 }
 
 TcpConn::~TcpConn() {
+    assert(m_state == kDisconnected);
     LogTrace("TcpConn::~TcpConn");
     m_ptrChannel->Remove();
     SocketUtils::Close(m_fd);
 }
 
 void TcpConn::ConnEstablished() {
+    assert(m_state == kConnecting);
+    m_state = kConnected;
     m_ptrChannel->EnableReading();
+    if (m_connectCallBack) {
+        m_connectCallBack(shared_from_this());
+    }
 }
 
 void TcpConn::ConnDestroyed() {
     LogTrace("TcpConn::ConnDestroyed()");
-    // Todo: 根据conn状态决定 disableAll()
-    // 因为很有可能会直接调用这个函数 而不先从poll中删除
-    // m_ptrChannel->DisableAll();
+    if (m_state == kConnected) {
+        m_state = kDisconnected;
+        m_ptrChannel->DisableAll();
+    }
     m_ptrChannel->Remove();
+    if (m_disconnectCallBack) {
+        m_disconnectCallBack(shared_from_this());
+    }
 }
 
 void TcpConn::ShutDown() {
+    if (m_state != kConnected) {
+        return;
+    }
 
+    m_state = kDisconecting;
+    if (!m_ptrChannel->IsWriting()) {
+        SocketUtils::Shutdown(m_fd);
+    }
 }
 
 void TcpConn::Send(const std::string& message) {
+    if (m_state != kConnected) {
+        return;
+    }
+
     m_sendBuf.Append(message.data(), message.size());
     if (!m_ptrChannel->IsWriting()) {
         m_ptrChannel->EnableWriting();
@@ -77,8 +103,11 @@ void TcpConn::_HandleWrite() {
     if (n > 0) {
         if (m_sendBuf.GetReadSize() == 0) {
             m_ptrChannel->DisableWriting();
-        } else {
-            LogTrace("还有很多可写");
+            // 写完了 如果已经被设置为shutdown的话, 要进行shutdown
+            // 不要调用类中的 shutdown 接口 会出问题
+            if (m_state == kDisconecting) {
+                SocketUtils::Shutdown(m_fd);
+            }
         }
     } else {
         LogErr("TcpConn::_HandleWrite()");
@@ -86,7 +115,9 @@ void TcpConn::_HandleWrite() {
 }
 
 void TcpConn::_HandleClose() {
+    assert(m_state == kConnected || m_state == kDisconecting);
     LogTrace("TcpConn::_HandleClose()");
+    m_state = kDisconnected;
     m_ptrChannel->DisableAll();
     if (m_closeCallBack) {
         m_closeCallBack(shared_from_this());

@@ -17,6 +17,10 @@ public:
 public:
     void Start();
     void Stop();
+    void Send(uint16_t cmd) {
+        printf("%d\n", cmd);
+    }
+    Poller* GetPoller() const { return m_ptrPoller; }
 public:
     void SetConnectCallBack(const ConnectCallBack& callBack) {
         m_connectCallBack = callBack;

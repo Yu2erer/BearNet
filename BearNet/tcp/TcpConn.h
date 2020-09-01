@@ -10,13 +10,15 @@ namespace BearNet {
 
 class Channel;
 class Poller;
+class TcpServer;
 
 class TcpConn : private Noncopyable, 
     public std::enable_shared_from_this<TcpConn> {
 public:
-    TcpConn(Poller* poller, const int fd, size_t bufferSize);
+    TcpConn(TcpServer* tcpServer, const int fd, size_t bufferSize);
     ~TcpConn();
 public:
+    void Send(const void* data, uint32_t size);
     void Send(const std::string& message);
     void ShutDown();
     void ConnEstablished();
@@ -25,6 +27,7 @@ public:
     uint64_t GetID() const { return m_id; }
     bool IsConnected() const { return m_state == kConnected; }
     bool IsDisconnected() const { return m_state == kDisconnected; }
+    TcpServer* GetTcpServer() const { return m_tcpServer; }
 public:
     void SetConnectCallBack(const ConnectCallBack& callBack) {
         m_connectCallBack = callBack;
@@ -36,8 +39,8 @@ public:
         m_messageCallBack = callBack;
     }
     // just TcpServer or TcpClient use.
-    void SetCloseCallBack(const CloseCallBack& callBack) {
-        m_closeCallBack = callBack;
+    void SetInnerCloseCallBack(const InnerCloseCallBack& callBack) {
+        m_innerCloseCallBack = callBack;
     }
 private:
     void _HandleRead();
@@ -49,6 +52,7 @@ private:
         kDisconnected, kConnecting, kConnected, kDisconecting
     };
     uint64_t m_id;
+    TcpServer* m_tcpServer;
     Poller* m_ptrPoller;
     ConnStatus m_state;
     // 析构的时候 应当 close
@@ -57,7 +61,7 @@ private:
     ConnectCallBack m_connectCallBack;
     DisconnectCallBack m_disconnectCallBack;
     MessageCallBack m_messageCallBack;
-    CloseCallBack m_closeCallBack;
+    InnerCloseCallBack m_innerCloseCallBack;
     Buffer m_recvBuf;
     Buffer m_sendBuf;
 

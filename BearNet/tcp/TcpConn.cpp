@@ -3,12 +3,14 @@
 #include "BearNet/tcp/TcpConn.h"
 #include "BearNet/Channel.h"
 #include "BearNet/base/Log.h"
+#include "BearNet/tcp/TcpServer.h"
 
 using namespace BearNet;
 
 
-TcpConn::TcpConn(Poller* poller, const int fd, size_t bufferSize)
-    : m_ptrPoller(poller),
+TcpConn::TcpConn(TcpServer* tcpServer, const int fd, size_t bufferSize)
+    : m_tcpServer(tcpServer),
+      m_ptrPoller(tcpServer->GetPoller()),
       m_state(kConnecting),
       m_fd(fd),
       m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
@@ -67,6 +69,10 @@ void TcpConn::ShutDown() {
     }
 }
 
+void TcpConn::Send(const void* data, uint32_t size) {
+    Send(std::string(static_cast<const char*>(data), size));
+}
+
 void TcpConn::Send(const std::string& message) {
     if (m_state != kConnected) {
         return;
@@ -119,8 +125,8 @@ void TcpConn::_HandleClose() {
     LogTrace("TcpConn::_HandleClose()");
     m_state = kDisconnected;
     m_ptrChannel->DisableAll();
-    if (m_closeCallBack) {
-        m_closeCallBack(shared_from_this());
+    if (m_innerCloseCallBack) {
+        m_innerCloseCallBack(shared_from_this());
     }
 }
 

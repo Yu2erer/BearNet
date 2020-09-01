@@ -33,11 +33,11 @@ void TcpServer::Start() {
 
 void TcpServer::_NewConnection(int fd) {
     LogDebug("TcpServer New Connection");
-    TcpConnPtr conn(new TcpConn(m_ptrPoller, fd, m_bufferSize));
+    TcpConnPtr conn(new TcpConn(this, fd, m_bufferSize));
     conn->SetConnectCallBack(m_connectCallBack);
     conn->SetDisconnectCallBack(m_disconnectCallBack);
     conn->SetMessageCallBack(m_messageCallBack);
-    conn->SetCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
+    conn->SetInnerCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
     // 存储起来, 避免 conn 的引用计数为 0 被销毁
     m_connMap[conn->GetID()] = conn;
     conn->ConnEstablished();

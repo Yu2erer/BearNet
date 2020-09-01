@@ -22,8 +22,9 @@ void onMessage(const TcpConnPtr& conn, Buffer* buf) {
     char *buffer = nullptr;
     uint32_t bufferSize = 0;
     DefaultCodec::instance().Encode(16, message.c_str(), message.size(), &buffer, &bufferSize);
-    string msg(buffer, bufferSize);
-    conn->Send(msg);
+
+    conn->GetTcpServer()->Send(13);
+    conn->Send(buffer, bufferSize);
 }
 
 void onConnect(const TcpConnPtr& conn) {

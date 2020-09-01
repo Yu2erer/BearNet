@@ -3,22 +3,37 @@
 
 #include <vector>
 #include <sys/types.h>
+#include <string>
 
 namespace BearNet {
 
 class Buffer {
 public:
-    explicit Buffer(size_t initSize, const int fd) 
-        : m_bufVec(initSize),
-          m_fd(fd) { }
+    explicit Buffer(size_t initSize = 1024) 
+        : m_bufVec(initSize), m_readIndex(0),
+          m_writeIndex(0) {
+     }
     ~Buffer() = default;
 public:
-    ssize_t ReadFd();
-    ssize_t WriteFd();
+    ssize_t ReadFd(int fd);
+    ssize_t WriteFd(int fd);
 public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
+public:
     void Append(const char* data, size_t size);
+    void Append(const void* data, size_t size);
+    
+    // 转换为 Big Endian
+    void AppendToNet(int64_t x);
+    void AppendToNet(int32_t x);
+    void AppendToNet(int16_t x);
+    void AppendToNet(uint16_t x);
+    void AppendToNet(int8_t x);
+public:
+    std::string ReadString(size_t size);
+    int32_t ReadInt32();
+    uint16_t ReadUint16();
 public:
     char* GetWritePtr() { return _Begin() + m_writeIndex; }
     const char* GetWritePtr() const { return _Begin() + m_writeIndex; }
@@ -35,7 +50,6 @@ private:
     void _MakeSpace(size_t size);
 private:
     std::vector<char> m_bufVec;
-    const int m_fd;
     size_t m_readIndex;
     size_t m_writeIndex;
 };

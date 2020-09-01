@@ -4,23 +4,23 @@
 #include <unordered_map>
 
 #include "BearNet/tcp/TcpConn.h"
+#include "BearNet/NetHandle.h"
 
 namespace BearNet {
 
 class Poller;
 class Acceptor;
+class Codec;
 
-class TcpServer : private Noncopyable {
+class TcpServer : public NetHandle {
 public:
-    TcpServer(Poller *poller, const std::string& ip, uint16_t port, size_t bufferSize = 10);
+    TcpServer(Poller* poller, const std::string& ip, uint16_t port, size_t bufferSize = 10);
     ~TcpServer();
 public:
     void Start();
     void Stop();
-    void Send(uint16_t cmd) {
-        printf("%d\n", cmd);
-    }
     Poller* GetPoller() const { return m_ptrPoller; }
+    std::shared_ptr<Codec> GetCodec() { return m_ptrCodec; }
 public:
     void SetConnectCallBack(const ConnectCallBack& callBack) {
         m_connectCallBack = callBack;
@@ -31,11 +31,15 @@ public:
     void SetMessageCallback(const MessageCallBack& callBack) {
         m_messageCallBack = callBack;
     }
+public:
+    static void Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize);
 private:
     void _NewConnection(int fd);
-    void _DeleteConnection(const TcpConnPtr&);
+    void _DeleteConnection(const TcpConnPtr& conn);
+    void _InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf);
 private:
     Poller* m_ptrPoller;
+    std::shared_ptr<Codec> m_ptrCodec;
     std::string m_ip;
     uint16_t m_port;
     size_t m_bufferSize;

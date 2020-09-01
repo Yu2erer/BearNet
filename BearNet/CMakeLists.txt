@@ -3,6 +3,8 @@ set(BearNetSrc
     Channel.cpp
     SocketUtils.cpp
     Buffer.cpp
+    NetHandle.cpp
+    codec/Codec.cpp
     poller/Poller.cpp
     poller/EpollPoller.cpp
     tcp/Acceptor.cpp

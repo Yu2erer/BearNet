@@ -14,8 +14,8 @@ TcpConn::TcpConn(TcpServer* tcpServer, const int fd, size_t bufferSize)
       m_state(kConnecting),
       m_fd(fd),
       m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
-      m_recvBuf(bufferSize, m_fd),
-      m_sendBuf(bufferSize, m_fd) {
+      m_recvBuf(bufferSize),
+      m_sendBuf(bufferSize) {
 
     static uint64_t id = 0;
     m_id = ++ id;
@@ -74,7 +74,7 @@ void TcpConn::Send(const void* data, uint32_t size) {
 }
 
 void TcpConn::Send(const std::string& message) {
-    if (m_state != kConnected) {
+    if (m_state != kConnected || message.empty()) {
         return;
     }
 
@@ -84,8 +84,13 @@ void TcpConn::Send(const std::string& message) {
     }
 }
 
+void TcpConn::Send(Buffer* buffer) {
+    Send(buffer->GetReadPtr(), buffer->GetReadSize());
+    buffer->WriteAll();
+}
+
 void TcpConn::_HandleRead() {
-    ssize_t n = m_recvBuf.ReadFd();
+    ssize_t n = m_recvBuf.ReadFd(m_fd);
     if (n > 0) {
         if (m_messageCallBack) {
             m_messageCallBack(shared_from_this(), &m_recvBuf);
@@ -104,7 +109,7 @@ void TcpConn::_HandleWrite() {
         return;
     }
 
-    ssize_t n = m_sendBuf.WriteFd();
+    ssize_t n = m_sendBuf.WriteFd(m_fd);
 
     if (n > 0) {
         if (m_sendBuf.GetReadSize() == 0) {

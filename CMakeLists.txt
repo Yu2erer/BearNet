@@ -7,6 +7,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(BearNet)
+add_definitions("-O0 -Wall -g -ggdb")
+
 
 option(BUILD_EXAMPLE "Build Example?" OFF)
 if (BUILD_EXAMPLE)

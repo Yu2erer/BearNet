@@ -3,12 +3,14 @@
 #include "BearNet/base/Log.h"
 #include "BearNet/tcp/TcpServer.h"
 #include "BearNet/tcp/Acceptor.h"
+#include "BearNet/codec/Codec.h"
 
 using namespace BearNet;
 
 
 TcpServer::TcpServer(Poller *poller, const std::string& ip, uint16_t port, size_t bufferSize)
     : m_ptrPoller(poller),
+      m_ptrCodec(new Codec()),
       m_ip(ip),
       m_port(port),
       m_bufferSize(bufferSize),
@@ -30,14 +32,26 @@ void TcpServer::Start() {
     m_ptrAcceptor->Listen();
 }
 
+void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
+    m_ptrCodec->Decode(conn, buf);
+    if (m_messageCallBack) {
+        LogDebug("内部托管");
+        m_messageCallBack(conn, buf);
+    }
+}
 
 void TcpServer::_NewConnection(int fd) {
     LogDebug("TcpServer New Connection");
     TcpConnPtr conn(new TcpConn(this, fd, m_bufferSize));
+    
+    // 外部回调
     conn->SetConnectCallBack(m_connectCallBack);
     conn->SetDisconnectCallBack(m_disconnectCallBack);
-    conn->SetMessageCallBack(m_messageCallBack);
+
+    // 内部回调
+    conn->SetMessageCallBack(std::bind(&TcpServer::_InnerMessageCallBack, this, std::placeholders::_1, std::placeholders::_2));
     conn->SetInnerCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
+
     // 存储起来, 避免 conn 的引用计数为 0 被销毁
     m_connMap[conn->GetID()] = conn;
     conn->ConnEstablished();
@@ -48,4 +62,10 @@ void TcpServer::_DeleteConnection(const TcpConnPtr& conn) {
     auto n = m_connMap.erase(conn->GetID());
     (void)n;
     assert(n == 1);
+}
+
+void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize) {
+    Buffer buffer;
+    conn->GetTcpServer()->GetCodec()->Encode(&buffer, cmd, data, dataSize);
+    conn->Send(&buffer);
 }

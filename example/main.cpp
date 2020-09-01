@@ -5,26 +5,28 @@
 #include "BearNet/poller/EpollPoller.h"
 #include "BearNet/Channel.h"
 #include "BearNet/Buffer.h"
+#include "BearNet/codec/Codec.h"
 
-#include "codec.h"
+// #include "codec.h"
 
 using namespace BearNet;
 using namespace std;
 
-
+// [cmd] 100     req 101
 void onMessage(const TcpConnPtr& conn, Buffer* buf) {
-    DefaultCodec::instance().Decode(buf->GetReadPtr(), buf->GetReadSize());
+    // DefaultCodec::instance().Decode(buf->GetReadPtr(), buf->GetReadSize());
     
-    string message(buf->GetReadPtr(), buf->GetReadSize());
-    buf->Write(buf->GetReadSize());
-    // printf("onMessage(): [%s], size: %d\n", message.c_str(), message.size());
+    // string message(buf->GetReadPtr(), buf->GetReadSize());
+    // buf->Write(buf->GetReadSize());
+    // // printf("onMessage(): [%s], size: %d\n", message.c_str(), message.size());
 
-    char *buffer = nullptr;
-    uint32_t bufferSize = 0;
-    DefaultCodec::instance().Encode(16, message.c_str(), message.size(), &buffer, &bufferSize);
-
-    conn->GetTcpServer()->Send(13);
-    conn->Send(buffer, bufferSize);
+    // char *buffer = nullptr;
+    // uint32_t bufferSize = 0;
+    // DefaultCodec::instance().Encode(16, message.c_str(), message.size(), &buffer, &bufferSize);
+    // conn->GetTcpServer()->GetCmdCallBack(16)(conn);
+    // conn->Send(buffer, 0);
+    // conn->GetTcpServer()->
+    TcpServer::Send(conn, 16, "HelloWorld", 10);
 }
 
 void onConnect(const TcpConnPtr& conn) {
@@ -35,6 +37,10 @@ void onDisconnect(const TcpConnPtr& conn) {
     cout << "onDisconnect" << endl;
 }
 
+void onCmd16(const TcpConnPtr& conn) { 
+    cout << "cmd 16 succ." << endl;
+}
+
 int main() {
     std::unique_ptr<Poller> poller(new EpollPoller());
 
@@ -42,6 +48,8 @@ int main() {
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
     server.SetMessageCallback(onMessage);
+    server.Register(16, onCmd16);
+
     server.Start();
     
     Poller::ChannelList activeChannelList;

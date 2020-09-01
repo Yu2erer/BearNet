@@ -20,6 +20,7 @@ public:
 public:
     void Send(const void* data, uint32_t size);
     void Send(const std::string& message);
+    void Send(Buffer* buffer);
     void ShutDown();
     void ConnEstablished();
     void ConnDestroyed();

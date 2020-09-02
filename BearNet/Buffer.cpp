@@ -89,27 +89,43 @@ void Buffer::AppendToNet(int8_t x) {
     Append(&x, sizeof(x));
 }
 
-std::string Buffer::ReadString(size_t size) {
+std::string Buffer::PeekString(size_t size) {
+    printf("size: %d, readSize: %d\n", size, GetReadSize());
     assert(size <= GetReadSize());
     std::string result(GetReadPtr(), size);
+    return result;
+}
+
+std::string Buffer::ReadString(size_t size) {
+    std::string result = PeekString(size);
     Write(size);
     return result;
 }
 
-int32_t Buffer::ReadInt32() {
+int32_t Buffer::PeekInt32() {
     assert(sizeof(int32_t) <= GetReadSize());
     int32_t xbe32 = 0;
     ::memcpy(&xbe32, GetReadPtr(), sizeof(int32_t));
-    Write(sizeof(int32_t));
     return be32toh(xbe32);
 }
 
-uint16_t Buffer::ReadUint16() {
+int32_t Buffer::ReadInt32() {
+    int32_t result = PeekInt32();
+    Write(sizeof(int32_t));
+    return result;
+}
+
+uint16_t Buffer::PeekUint16() {
     assert(sizeof(uint16_t) <= GetReadSize());
     uint16_t xbe16 = 0;
     ::memcpy(&xbe16, GetReadPtr(), sizeof(uint16_t));
-    Write(sizeof(uint16_t));
     return be16toh(xbe16);
+}
+
+uint16_t Buffer::ReadUint16() {
+    uint16_t result = PeekUint16();
+    Write(sizeof(uint16_t));
+    return result;
 }
 
 void Buffer::_MakeSpace(size_t size) {

@@ -31,8 +31,11 @@ public:
     void AppendToNet(uint16_t x);
     void AppendToNet(int8_t x);
 public:
+    std::string PeekString(size_t size);
     std::string ReadString(size_t size);
+    int32_t PeekInt32();
     int32_t ReadInt32();
+    uint16_t PeekUint16();
     uint16_t ReadUint16();
 public:
     char* GetWritePtr() { return _Begin() + m_writeIndex; }

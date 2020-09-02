@@ -32,14 +32,6 @@ void TcpServer::Start() {
     m_ptrAcceptor->Listen();
 }
 
-void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
-    m_ptrCodec->Decode(conn, buf);
-    if (m_messageCallBack) {
-        LogDebug("内部托管");
-        m_messageCallBack(conn, buf);
-    }
-}
-
 void TcpServer::_NewConnection(int fd) {
     LogDebug("TcpServer New Connection");
     TcpConnPtr conn(new TcpConn(this, fd, m_bufferSize));
@@ -49,12 +41,35 @@ void TcpServer::_NewConnection(int fd) {
     conn->SetDisconnectCallBack(m_disconnectCallBack);
 
     // 内部回调
-    conn->SetMessageCallBack(std::bind(&TcpServer::_InnerMessageCallBack, this, std::placeholders::_1, std::placeholders::_2));
+    conn->SetInnerMessageCallBack(std::bind(&TcpServer::_InnerMessageCallBack, this, std::placeholders::_1, std::placeholders::_2));
     conn->SetInnerCloseCallBack(std::bind(&TcpServer::_DeleteConnection, this, std::placeholders::_1));
 
     // 存储起来, 避免 conn 的引用计数为 0 被销毁
     m_connMap[conn->GetID()] = conn;
     conn->ConnEstablished();
+}
+
+void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
+    // 循环是因为 可能缓冲区内已有多个包
+    while (buf->GetReadSize() > 0) {
+        NetPackage netPackage;
+        int res = m_ptrCodec->Decode(conn, buf, &netPackage);
+        if (res == 0) {
+            LogDebug("res == 0");
+            break;
+        } else if (res == -1) {
+            conn->ConnDestroyed();
+            m_connMap.erase(conn->GetID());
+            return;
+        }
+        // res == 1
+        auto callBack = GetCmdCallBack(netPackage.cmd);
+        if (!callBack) {
+            LogDebug("不认识 cmd: %d", netPackage.cmd);
+        } else {
+            callBack(conn, netPackage.msg);
+        }
+    }
 }
 
 void TcpServer::_DeleteConnection(const TcpConnPtr& conn) {

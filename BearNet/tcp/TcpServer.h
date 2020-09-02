@@ -28,9 +28,6 @@ public:
     void SetDisconnectCallBack(const DisconnectCallBack& callBack) {
         m_disconnectCallBack = callBack;
     }
-    void SetMessageCallback(const MessageCallBack& callBack) {
-        m_messageCallBack = callBack;
-    }
 public:
     static void Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize);
 private:
@@ -46,7 +43,6 @@ private:
     std::unique_ptr<Acceptor> m_ptrAcceptor;
     ConnectCallBack m_connectCallBack;
     DisconnectCallBack m_disconnectCallBack;
-    MessageCallBack m_messageCallBack;
     // TcpConnPtr 引用, 移除出去时, 有可能会销毁
     std::unordered_map<uint64_t, TcpConnPtr> m_connMap;
 };

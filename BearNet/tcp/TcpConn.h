@@ -36,8 +36,8 @@ public:
     void SetDisconnectCallBack(const DisconnectCallBack& callBack) {
         m_disconnectCallBack = callBack;
     }
-    void SetMessageCallBack(const MessageCallBack& callBack) {
-        m_messageCallBack = callBack;
+    void SetInnerMessageCallBack(const InnerMessageCallBack& callBack) {
+        m_innerMessageCallBack = callBack;
     }
     // just TcpServer or TcpClient use.
     void SetInnerCloseCallBack(const InnerCloseCallBack& callBack) {
@@ -61,7 +61,7 @@ private:
     std::unique_ptr<Channel> m_ptrChannel;
     ConnectCallBack m_connectCallBack;
     DisconnectCallBack m_disconnectCallBack;
-    MessageCallBack m_messageCallBack;
+    InnerMessageCallBack m_innerMessageCallBack;
     InnerCloseCallBack m_innerCloseCallBack;
     Buffer m_recvBuf;
     Buffer m_sendBuf;

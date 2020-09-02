@@ -12,13 +12,19 @@ namespace BearNet {
 
 class Buffer;
 
+struct NetPackage {
+    uint16_t cmd;
+    std::string msg;
+};
+
 class Codec : private Noncopyable {
 public:
     Codec() = default;
     ~Codec() = default;
 public:
     void Encode(Buffer* buffer, uint16_t cmd, const char* data, int32_t dataSize);
-    void Decode(const TcpConnPtr& conn, Buffer* buffer);
+    // -1 错误, 0 未完整, 1 解包成功
+    int Decode(const TcpConnPtr& conn, Buffer* buffer, NetPackage* netPackage);
 #pragma pack(push, 1)
 struct CodecHeader {
     // tag: Bear

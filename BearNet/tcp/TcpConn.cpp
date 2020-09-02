@@ -92,9 +92,7 @@ void TcpConn::Send(Buffer* buffer) {
 void TcpConn::_HandleRead() {
     ssize_t n = m_recvBuf.ReadFd(m_fd);
     if (n > 0) {
-        if (m_messageCallBack) {
-            m_messageCallBack(shared_from_this(), &m_recvBuf);
-        }
+        m_innerMessageCallBack(shared_from_this(), &m_recvBuf);
     } else if (n == 0) {
         _HandleClose();
     } else {
@@ -130,9 +128,7 @@ void TcpConn::_HandleClose() {
     LogTrace("TcpConn::_HandleClose()");
     m_state = kDisconnected;
     m_ptrChannel->DisableAll();
-    if (m_innerCloseCallBack) {
-        m_innerCloseCallBack(shared_from_this());
-    }
+    m_innerCloseCallBack(shared_from_this());
 }
 
 void TcpConn::_HandleError() {

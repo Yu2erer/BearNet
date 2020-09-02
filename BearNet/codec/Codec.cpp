@@ -14,24 +14,31 @@ void Codec::Encode(Buffer* buffer, uint16_t cmd, const char* data, int32_t dataS
     buffer->AppendToNet(cmd);
     buffer->Append(data, dataSize);
 }
-    
 
-void Codec::Decode(const TcpConnPtr& conn, Buffer* buffer) {
+int Codec::Decode(const TcpConnPtr& conn, Buffer* buffer, NetPackage* netPackage) {
     if (buffer->GetReadSize() < kCodecHeaderSize) {
-        printf("rawSize < kCodecHeaderSize\n");
-        return;
+        return 0;
     }
-    if (buffer->ReadString(kCodecTagSize) != kCodecTag) {
-        printf("tag Failed.\n");
-        // 应该关闭连接
-        conn->ConnDestroyed();
-        return;
+    if (buffer->PeekString(kCodecTagSize) != kCodecTag) {
+        printf("tag failed\n");
+        return -1;
     }
-    cout << buffer->GetReadSize() << endl;
-    int k = buffer->ReadInt32();
-    printf("收到 长度 : %d\n", k);
-    printf("收到 cmd: %d\n", buffer->ReadUint16());
+    buffer->ReadString(kCodecTagSize);
+    int32_t size = buffer->ReadInt32();
+    uint16_t cmd = buffer->ReadUint16();
+    printf("收到 长度: %d\n", size);
+    printf("收到 cmd: %d\n", cmd);
 
-    cout << buffer->ReadString(k) << endl;
-
+    if (buffer->GetReadSize() < size) {
+        printf("大小不对\n");
+        return -1;
+    }
+    if (size > (UINT32_MAX - kCodecHeaderSize)) {
+        printf("大小不对2\n");
+        return -1;
+    }
+    std::string msg = buffer->ReadString(size);
+    netPackage->cmd = cmd;
+    netPackage->msg = msg;
+    return 1;
 }

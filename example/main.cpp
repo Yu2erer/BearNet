@@ -12,22 +12,22 @@
 using namespace BearNet;
 using namespace std;
 
-// [cmd] 100     req 101
-void onMessage(const TcpConnPtr& conn, Buffer* buf) {
-    // DefaultCodec::instance().Decode(buf->GetReadPtr(), buf->GetReadSize());
+// // [cmd] 100     req 101
+// void onMessage(const TcpConnPtr& conn, Buffer* buf) {
+//     // DefaultCodec::instance().Decode(buf->GetReadPtr(), buf->GetReadSize());
     
-    // string message(buf->GetReadPtr(), buf->GetReadSize());
-    // buf->Write(buf->GetReadSize());
-    // // printf("onMessage(): [%s], size: %d\n", message.c_str(), message.size());
+//     // string message(buf->GetReadPtr(), buf->GetReadSize());
+//     // buf->Write(buf->GetReadSize());
+//     // // printf("onMessage(): [%s], size: %d\n", message.c_str(), message.size());
 
-    // char *buffer = nullptr;
-    // uint32_t bufferSize = 0;
-    // DefaultCodec::instance().Encode(16, message.c_str(), message.size(), &buffer, &bufferSize);
-    // conn->GetTcpServer()->GetCmdCallBack(16)(conn);
-    // conn->Send(buffer, 0);
-    // conn->GetTcpServer()->
-    TcpServer::Send(conn, 16, "HelloWorld", 10);
-}
+//     // char *buffer = nullptr;
+//     // uint32_t bufferSize = 0;
+//     // DefaultCodec::instance().Encode(16, message.c_str(), message.size(), &buffer, &bufferSize);
+//     // conn->GetTcpServer()->GetCmdCallBack(16)(conn);
+//     // conn->Send(buffer, 0);
+//     // conn->GetTcpServer()->
+//     TcpServer::Send(conn, 16, "HelloWorld", 10);
+// }
 
 void onConnect(const TcpConnPtr& conn) {
     cout << "onConnect" << endl;
@@ -37,8 +37,9 @@ void onDisconnect(const TcpConnPtr& conn) {
     cout << "onDisconnect" << endl;
 }
 
-void onCmd16(const TcpConnPtr& conn) { 
+void onCmd16(const TcpConnPtr& conn, const std::string& msg) { 
     cout << "cmd 16 succ." << endl;
+    cout << msg << endl;
 }
 
 int main() {
@@ -47,7 +48,6 @@ int main() {
     TcpServer server(poller.get(), "0.0.0.0", 1234);
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
-    server.SetMessageCallback(onMessage);
     server.Register(16, onCmd16);
 
     server.Start();

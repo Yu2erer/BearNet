@@ -10,9 +10,9 @@ add_subdirectory(BearNet)
 add_definitions("-O0 -Wall -g -ggdb")
 
 
-option(BUILD_EXAMPLE "Build Example?" OFF)
+option(BUILD_EXAMPLE "Build Example?" ON)
 if (BUILD_EXAMPLE)
     set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-    link_libraries(BearNet)
-    add_executable(bearnet example/main.cpp)
+    link_libraries(bearnet)
+    add_executable(bearServer example/main.cpp)
 endif(BUILD_EXAMPLE)

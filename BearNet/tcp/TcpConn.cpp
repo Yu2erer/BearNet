@@ -37,7 +37,7 @@ TcpConn::~TcpConn() {
     SocketUtils::Close(m_fd);
 }
 
-void TcpConn::ConnEstablished() {
+void TcpConn::_ConnEstablished() {
     assert(m_state == kConnecting);
     m_state = kConnected;
     m_ptrChannel->EnableReading();
@@ -46,7 +46,7 @@ void TcpConn::ConnEstablished() {
     }
 }
 
-void TcpConn::ConnDestroyed() {
+void TcpConn::_ConnDestroyed() {
     LogTrace("TcpConn::ConnDestroyed()");
     if (m_state == kConnected) {
         m_state = kDisconnected;
@@ -69,11 +69,19 @@ void TcpConn::ShutDown() {
     }
 }
 
-void TcpConn::Send(const void* data, uint32_t size) {
-    Send(std::string(static_cast<const char*>(data), size));
+void TcpConn::Send(uint16_t cmd, const char* data, int32_t dataSize) {
+    TcpServer::Send(shared_from_this(), cmd, data, dataSize);
 }
 
-void TcpConn::Send(const std::string& message) {
+void TcpConn::Send(uint16_t cmd) {
+    TcpServer::Send(shared_from_this(), cmd);
+}
+
+void TcpConn::_Send(const void* data, uint32_t size) {
+    _Send(std::string(static_cast<const char*>(data), size));
+}
+
+void TcpConn::_Send(const std::string& message) {
     if (m_state != kConnected || message.empty()) {
         return;
     }
@@ -84,8 +92,8 @@ void TcpConn::Send(const std::string& message) {
     }
 }
 
-void TcpConn::Send(Buffer* buffer) {
-    Send(buffer->GetReadPtr(), buffer->GetReadSize());
+void TcpConn::_Send(Buffer* buffer) {
+    _Send(buffer->GetReadPtr(), buffer->GetReadSize());
     buffer->WriteAll();
 }
 

@@ -14,7 +14,7 @@ class Buffer;
 
 struct NetPackage {
     uint16_t cmd;
-    std::string msg;
+    std::shared_ptr<void> cmdMsg;
 };
 
 class Codec : private Noncopyable {

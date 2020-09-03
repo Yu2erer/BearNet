@@ -31,7 +31,6 @@ private:
     private:
         struct RegisterCmdInfo {
             CmdCallBack cmdCallBack;
-
             bool isRegister;
         };
         std::vector<RegisterCmdInfo> m_cmdCallBacks;

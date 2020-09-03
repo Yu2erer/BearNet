@@ -7,10 +7,10 @@ set(BearNetSrc
     codec/Codec.cpp
     poller/Poller.cpp
     poller/EpollPoller.cpp
-    tcp/Acceptor.cpp
+    tcp/TcpAcceptor.cpp
     tcp/TcpConn.cpp
     tcp/TcpServer.cpp
 )
 
-add_library(BearNet ${BearNetSrc})
+add_library(bearnet ${BearNetSrc})
 

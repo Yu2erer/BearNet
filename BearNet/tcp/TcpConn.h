@@ -14,35 +14,37 @@ class TcpServer;
 
 class TcpConn : private Noncopyable, 
     public std::enable_shared_from_this<TcpConn> {
+    friend class TcpServer;
 public:
     TcpConn(TcpServer* tcpServer, const int fd, size_t bufferSize);
     ~TcpConn();
 public:
-    void Send(const void* data, uint32_t size);
-    void Send(const std::string& message);
-    void Send(Buffer* buffer);
     void ShutDown();
-    void ConnEstablished();
-    void ConnDestroyed();
-public:
+    void Send(uint16_t cmd);
+    void Send(uint16_t cmd, const char* data, int32_t dataSize);
     uint64_t GetID() const { return m_id; }
     bool IsConnected() const { return m_state == kConnected; }
     bool IsDisconnected() const { return m_state == kDisconnected; }
-    TcpServer* GetTcpServer() const { return m_tcpServer; }
-public:
-    void SetConnectCallBack(const ConnectCallBack& callBack) {
+private:
+    // just TcpServer or TcpClient use.
+    void _SetConnectCallBack(const ConnectCallBack& callBack) {
         m_connectCallBack = callBack;
     }
-    void SetDisconnectCallBack(const DisconnectCallBack& callBack) {
+    void _SetDisconnectCallBack(const DisconnectCallBack& callBack) {
         m_disconnectCallBack = callBack;
     }
-    void SetInnerMessageCallBack(const InnerMessageCallBack& callBack) {
+    void _SetInnerMessageCallBack(const InnerMessageCallBack& callBack) {
         m_innerMessageCallBack = callBack;
     }
-    // just TcpServer or TcpClient use.
-    void SetInnerCloseCallBack(const InnerCloseCallBack& callBack) {
+    void _SetInnerCloseCallBack(const InnerCloseCallBack& callBack) {
         m_innerCloseCallBack = callBack;
     }
+    TcpServer* _GetTcpServer() const { return m_tcpServer; }
+    void _ConnEstablished();
+    void _ConnDestroyed();
+    void _Send(const void* data, uint32_t size);
+    void _Send(const std::string& message);
+    void _Send(Buffer* buffer);
 private:
     void _HandleRead();
     void _HandleWrite();

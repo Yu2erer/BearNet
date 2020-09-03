@@ -9,7 +9,7 @@
 namespace BearNet {
 
 class Poller;
-class Acceptor;
+class TcpAcceptor;
 class Codec;
 
 class TcpServer : public NetHandle {
@@ -20,7 +20,7 @@ public:
     void Start();
     void Stop();
     Poller* GetPoller() const { return m_ptrPoller; }
-    std::shared_ptr<Codec> GetCodec() { return m_ptrCodec; }
+    const std::shared_ptr<Codec>& GetCodec() const { return m_ptrCodec; }
 public:
     void SetConnectCallBack(const ConnectCallBack& callBack) {
         m_connectCallBack = callBack;
@@ -29,6 +29,7 @@ public:
         m_disconnectCallBack = callBack;
     }
 public:
+    static void Send(const TcpConnPtr& conn, uint16_t cmd);
     static void Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize);
 private:
     void _NewConnection(int fd);
@@ -40,7 +41,7 @@ private:
     std::string m_ip;
     uint16_t m_port;
     size_t m_bufferSize;
-    std::unique_ptr<Acceptor> m_ptrAcceptor;
+    std::unique_ptr<TcpAcceptor> m_ptrAcceptor;
     ConnectCallBack m_connectCallBack;
     DisconnectCallBack m_disconnectCallBack;
     // TcpConnPtr 引用, 移除出去时, 有可能会销毁

@@ -1,9 +1,7 @@
 #include "BearNet/codec/Codec.h"
 #include "BearNet/Buffer.h"
+#include "BearNet/tcp/TcpServer.h"
 
-#include <iostream>
-
-using namespace std;
 using namespace BearNet;
 
 const std::string kCodecTag = "Bear";
@@ -19,11 +17,10 @@ int Codec::Decode(const TcpConnPtr& conn, Buffer* buffer, NetPackage* netPackage
     if (buffer->GetReadSize() < kCodecHeaderSize) {
         return 0;
     }
-    if (buffer->PeekString(kCodecTagSize) != kCodecTag) {
+    if (buffer->ReadString(kCodecTagSize) != kCodecTag) {
         printf("tag failed\n");
         return -1;
     }
-    buffer->ReadString(kCodecTagSize);
     int32_t size = buffer->ReadInt32();
     uint16_t cmd = buffer->ReadUint16();
     printf("收到 长度: %d\n", size);
@@ -37,8 +34,9 @@ int Codec::Decode(const TcpConnPtr& conn, Buffer* buffer, NetPackage* netPackage
         printf("大小不对2\n");
         return -1;
     }
-    std::string msg = buffer->ReadString(size);
+    std::string* msg = new std::string;
+    msg->assign(buffer->ReadString(size));
     netPackage->cmd = cmd;
-    netPackage->msg = msg;
+    netPackage->cmdMsg.reset(msg);
     return 1;
 }

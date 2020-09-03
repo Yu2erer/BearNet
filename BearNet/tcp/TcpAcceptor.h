@@ -10,12 +10,12 @@
 
 namespace BearNet {
 
-class Acceptor : private Noncopyable {
+class TcpAcceptor : private Noncopyable {
 public:
     typedef std::function<void (int fd)> NewConnectionCallBack;
 
-    Acceptor(Poller* poller, const std::string& ip, uint16_t port);
-    ~Acceptor();
+    TcpAcceptor(Poller* poller, const std::string& ip, uint16_t port);
+    ~TcpAcceptor();
 public:
     bool Listen();
 

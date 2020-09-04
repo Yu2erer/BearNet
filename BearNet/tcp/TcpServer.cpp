@@ -64,10 +64,18 @@ void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
         }
         // res == 1
         auto callBack = GetCmdCallBack(netPackage.cmd);
+        auto p = GetCmdCallBack2(netPackage.cmd);
+
+        // p->OnMessage(conn, )
         if (!callBack) {
             LogDebug("不认识 cmd: %d", netPackage.cmd);
         } else {
-            callBack(conn, netPackage.cmdMsg);
+            // p->OnMessage(conn, )
+            // callBack(conn, netPackage.cmdMsg);
+            auto ptr = p->MakePtr();
+            ptr->Clear();
+            ptr->ParseFromString(netPackage.cmdMsg);
+            p->OnMessage(conn, ptr);
         }
     }
 }
@@ -79,7 +87,7 @@ void TcpServer::_DeleteConnection(const TcpConnPtr& conn) {
     assert(n == 1);
 }
 
-void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize) {
+void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd, const void* data, int32_t dataSize) {
     Buffer buffer;
     conn->_GetTcpServer()->GetCodec()->Encode(&buffer, cmd, data, dataSize);
     conn->_Send(&buffer);

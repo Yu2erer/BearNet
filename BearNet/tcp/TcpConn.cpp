@@ -69,7 +69,7 @@ void TcpConn::ShutDown() {
     }
 }
 
-void TcpConn::Send(uint16_t cmd, const char* data, int32_t dataSize) {
+void TcpConn::Send(uint16_t cmd, const void* data, int32_t dataSize) {
     TcpServer::Send(shared_from_this(), cmd, data, dataSize);
 }
 

@@ -18,6 +18,11 @@ void Buffer::Write(size_t size) {
     }
 }
 
+void Buffer::AppendReadIdx(size_t size) {
+    assert(size <= GetWriteSize());
+    m_writeIndex += size;
+}
+
 ssize_t Buffer::WriteFd(int fd) {
     const ssize_t n = ::write(fd, GetReadPtr(), GetReadSize());
     if (n > 0) {

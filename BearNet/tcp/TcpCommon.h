@@ -16,7 +16,7 @@ typedef std::function<void (const TcpConnPtr&)> DisconnectCallBack;
 typedef std::function<void (const TcpConnPtr&, Buffer*)> InnerMessageCallBack;
 typedef std::function<void (const TcpConnPtr&)> InnerCloseCallBack;
 
-typedef std::function<void (const TcpConnPtr&, const std::shared_ptr<void>&)> CmdCallBack;
+typedef std::function<void (const TcpConnPtr&, const std::string&)> CmdCallBack;
 
 }
 

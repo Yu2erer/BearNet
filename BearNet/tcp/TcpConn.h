@@ -21,7 +21,7 @@ public:
 public:
     void ShutDown();
     void Send(uint16_t cmd);
-    void Send(uint16_t cmd, const char* data, int32_t dataSize);
+    void Send(uint16_t cmd, const void* data, int32_t dataSize);
     uint64_t GetID() const { return m_id; }
     bool IsConnected() const { return m_state == kConnected; }
     bool IsDisconnected() const { return m_state == kDisconnected; }

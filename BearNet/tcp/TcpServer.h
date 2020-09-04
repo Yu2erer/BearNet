@@ -30,7 +30,7 @@ public:
     }
 public:
     static void Send(const TcpConnPtr& conn, uint16_t cmd);
-    static void Send(const TcpConnPtr& conn, uint16_t cmd, const char* data, int32_t dataSize);
+    static void Send(const TcpConnPtr& conn, uint16_t cmd, const void* data, int32_t dataSize);
 private:
     void _NewConnection(int fd);
     void _DeleteConnection(const TcpConnPtr& conn);

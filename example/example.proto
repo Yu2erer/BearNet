@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package BearExample;
+
+enum LOGIN_CMD {
+    LOGIN_NONE = 0;
+    LOGIN_REQ = 1001;
+    LOGIN_RSP = 1002;
+}
+
+message LoginReq {
+    uint32 Account = 1;
+    string Password = 2;
+}
+
+message LoginRsp {
+    bool Success = 1;
+}

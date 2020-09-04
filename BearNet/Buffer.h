@@ -20,6 +20,7 @@ public:
 public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
+    void AppendReadIdx(size_t size);
 public:
     void Append(const char* data, size_t size);
     void Append(const void* data, size_t size);

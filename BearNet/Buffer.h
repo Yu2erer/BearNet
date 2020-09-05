@@ -20,17 +20,23 @@ public:
 public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
-    void AppendReadIdx(size_t size);
+    // Change ReadIndex
+    void AppendWriteIndex(size_t size);
+    // Change WriteIndex
+    void AppendReadIndex(size_t size);
 public:
     void Append(const char* data, size_t size);
     void Append(const void* data, size_t size);
-    
-    // 转换为 Big Endian
+    void Append(const std::string& data);
+    // Host Endian To Net Endian
     void AppendToNet(int64_t x);
+    void AppendToNet(uint64_t x);
     void AppendToNet(int32_t x);
+    void AppendToNet(uint32_t x);
     void AppendToNet(int16_t x);
     void AppendToNet(uint16_t x);
     void AppendToNet(int8_t x);
+    void AppendToNet(uint8_t x);
 public:
     std::string PeekString(size_t size);
     std::string ReadString(size_t size);

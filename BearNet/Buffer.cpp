@@ -18,7 +18,12 @@ void Buffer::Write(size_t size) {
     }
 }
 
-void Buffer::AppendReadIdx(size_t size) {
+void Buffer::AppendWriteIndex(size_t size) {
+    assert(size <= GetReadSize());
+    m_readIndex += size;
+}
+
+void Buffer::AppendReadIndex(size_t size) {
     assert(size <= GetWriteSize());
     m_writeIndex += size;
 }
@@ -69,15 +74,28 @@ void Buffer::Append(const void* data, size_t size) {
     Append(static_cast<const char*>(data), size);
 }
 
+void Buffer::Append(const std::string& data) {
+    Append(data.data(), data.size());
+}
+
 void Buffer::AppendToNet(int64_t x) {
     int64_t xbe64 = htobe64(x);
+    Append(&xbe64, sizeof(xbe64));
+}
+
+void Buffer::AppendToNet(uint64_t x) {
+    uint64_t xbe64 = htobe64(x);
     Append(&xbe64, sizeof(xbe64));
 }
 
 void Buffer::AppendToNet(int32_t x) {
     int32_t xbe32 = htobe32(x);
     Append(&xbe32, sizeof(xbe32));
+}
 
+void Buffer::AppendToNet(uint32_t x) {
+    uint32_t xbe32 = htobe32(x);
+    Append(&xbe32, sizeof(xbe32));
 }
 
 void Buffer::AppendToNet(int16_t x) {
@@ -94,8 +112,11 @@ void Buffer::AppendToNet(int8_t x) {
     Append(&x, sizeof(x));
 }
 
+void Buffer::AppendToNet(uint8_t x) {
+    Append(&x, sizeof(x));
+}
+
 std::string Buffer::PeekString(size_t size) {
-    printf("size: %d, readSize: %d\n", size, GetReadSize());
     assert(size <= GetReadSize());
     std::string result(GetReadPtr(), size);
     return result;

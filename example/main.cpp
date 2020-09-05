@@ -27,17 +27,12 @@ void onDisconnect(const TcpConnPtr& conn) {
 }
 
 void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<BearExample::LoginReq>& msg) { 
-    cout << "直接获取到" << endl;
-
     cout << msg->account() <<endl;
     cout << msg->password() << endl;
-
-    // conn->Send(17);
+    
+    conn->Send(17);
 }
 
-void on16(const TcpConnPtr&, const std::string&) {
-
-}
 int main() {
 
 
@@ -46,8 +41,7 @@ int main() {
     TcpServer server(poller.get(), "0.0.0.0", 1234);
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
-    server.Register(16, on16);
-    server.Register2<BearExample::LoginReq>(16, onCmd16);
+    server.Register<BearExample::LoginReq>(16, onCmd16);
 
     server.Start();
     

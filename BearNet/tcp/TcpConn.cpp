@@ -77,6 +77,10 @@ void TcpConn::Send(uint16_t cmd) {
     TcpServer::Send(shared_from_this(), cmd);
 }
 
+const std::shared_ptr<CmdCallBack> TcpConn::GetCmdCallBack(uint16_t cmd) const {
+    return _GetTcpServer()->GetCmdCallBack(cmd);
+}
+
 void TcpConn::_Send(const void* data, uint32_t size) {
     _Send(std::string(static_cast<const char*>(data), size));
 }

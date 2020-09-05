@@ -25,6 +25,7 @@ public:
     uint64_t GetID() const { return m_id; }
     bool IsConnected() const { return m_state == kConnected; }
     bool IsDisconnected() const { return m_state == kDisconnected; }
+    const std::shared_ptr<CmdCallBack> GetCmdCallBack(uint16_t cmd) const;
 private:
     // just TcpServer or TcpClient use.
     void _SetConnectCallBack(const ConnectCallBack& callBack) {

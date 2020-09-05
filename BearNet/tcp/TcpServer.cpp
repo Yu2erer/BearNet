@@ -52,8 +52,8 @@ void TcpServer::_NewConnection(int fd) {
 void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
     // 循环是因为 可能缓冲区内已有多个包
     while (buf->GetReadSize() > 0) {
-        NetPackage netPackage;
-        int res = m_ptrCodec->Decode(conn, buf, &netPackage);
+        // Decode 成功 会自动调用 回调
+        int res = m_ptrCodec->Decode(conn, buf);
         if (res == 0) {
             LogDebug("res == 0");
             break;
@@ -61,21 +61,6 @@ void TcpServer::_InnerMessageCallBack(const TcpConnPtr& conn, Buffer* buf) {
             conn->_ConnDestroyed();
             m_connMap.erase(conn->GetID());
             return;
-        }
-        // res == 1
-        auto callBack = GetCmdCallBack(netPackage.cmd);
-        auto p = GetCmdCallBack2(netPackage.cmd);
-
-        // p->OnMessage(conn, )
-        if (!callBack) {
-            LogDebug("不认识 cmd: %d", netPackage.cmd);
-        } else {
-            // p->OnMessage(conn, )
-            // callBack(conn, netPackage.cmdMsg);
-            auto ptr = p->MakePtr();
-            ptr->Clear();
-            ptr->ParseFromString(netPackage.cmdMsg);
-            p->OnMessage(conn, ptr);
         }
     }
 }
@@ -94,5 +79,5 @@ void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd, const void* data, int
 }
 
 void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd) {
-    TcpServer::Send(conn, cmd, "", 0);
+    TcpServer::Send(conn, cmd, nullptr, 0);
 }

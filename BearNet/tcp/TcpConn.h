@@ -22,6 +22,8 @@ public:
     void ShutDown();
     void Send(uint16_t cmd);
     void Send(uint16_t cmd, const void* data, int32_t dataSize);
+    template <typename... T>
+    void Send(uint16_t cmd, const void* data, int32_t dataSize, T... args);
     uint64_t GetID() const { return m_id; }
     bool IsConnected() const { return m_state == kConnected; }
     bool IsDisconnected() const { return m_state == kDisconnected; }
@@ -69,7 +71,7 @@ private:
     Buffer m_recvBuf;
     Buffer m_sendBuf;
 
-}; 
+};
 
 }
 

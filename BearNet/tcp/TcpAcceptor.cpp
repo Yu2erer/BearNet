@@ -3,11 +3,9 @@
 
 using namespace BearNet;
 
-TcpAcceptor::TcpAcceptor(Poller* poller, const std::string& ip, uint16_t port) 
+TcpAcceptor::TcpAcceptor(Poller* poller) 
     : m_acceptFd(SocketUtils::Create()), 
-      m_acceptChannel(m_acceptFd, poller),
-      m_ip(ip),
-      m_port(port) {
+      m_acceptChannel(m_acceptFd, poller) {
     m_acceptChannel.SetReadCallBack(std::bind(&TcpAcceptor::_HandleRead, this));
 
 }
@@ -17,8 +15,8 @@ TcpAcceptor::~TcpAcceptor() {
   m_acceptChannel.Remove();
 }
 
-bool TcpAcceptor::Listen() {
-    bool ret = SocketUtils::Listen(m_acceptFd, m_ip, m_port);
+bool TcpAcceptor::Listen(const std::string& ip, uint16_t port) {
+    bool ret = SocketUtils::Listen(m_acceptFd, ip, port);
     if (!ret) {
         return false;
     }

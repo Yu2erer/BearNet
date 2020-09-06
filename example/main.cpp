@@ -16,34 +16,34 @@ using namespace std;
 
 void onConnect(const TcpConnPtr& conn) {
     cout << "onConnect" << endl;
-    BearExample::LoginReq req;
-    req.set_account(1179953947);
-    req.set_password("bearPass");
-    conn->Send(16, (&req), 4);
+    // BearExample::LoginReq req;
+    // req.set_account(1179953947);
+    // req.set_password("bearPass");
+    conn->Send(16, "1234", 4);
 }
 
 void onDisconnect(const TcpConnPtr& conn) {
     cout << "onDisconnect" << endl;
 }
 
-void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<BearExample::LoginReq>& msg) { 
-    cout << msg->account() <<endl;
-    cout << msg->password() << endl;
-    
-    conn->Send(17);
+void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) { 
+    // cout << msg->account() <<endl;
+    // cout << msg->password() << endl;
+    cout << msg->data() << endl;
+    conn->Send(17, nullptr, 0, 13, 14, 15, "123");
 }
 
 int main() {
 
 
     std::unique_ptr<Poller> poller(Poller::CreatePoller());
-
-    TcpServer server(poller.get(), "0.0.0.0", 1234);
+    std::unique_ptr<Codec> codec(new Codec());
+    TcpServer server(poller.get(), codec.get());
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
-    server.Register<BearExample::LoginReq>(16, onCmd16);
+    server.Register<std::string>(16, onCmd16);
 
-    server.Start();
+    server.Start("0.0.0.0", 1234);
     
     Poller::ChannelList activeChannelList;
     for (;;) {

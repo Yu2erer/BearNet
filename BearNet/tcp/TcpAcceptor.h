@@ -14,10 +14,10 @@ class TcpAcceptor : private Noncopyable {
 public:
     typedef std::function<void (int fd)> NewConnectionCallBack;
 
-    TcpAcceptor(Poller* poller, const std::string& ip, uint16_t port);
+    TcpAcceptor(Poller* poller);
     ~TcpAcceptor();
 public:
-    bool Listen();
+    bool Listen(const std::string& ip, uint16_t port);
 
     void SetNewConnectionCallBack(const NewConnectionCallBack& callBack) {
         m_newConnectionCallBack = callBack;

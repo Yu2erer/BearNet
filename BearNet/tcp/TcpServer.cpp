@@ -3,18 +3,17 @@
 #include "BearNet/base/Log.h"
 #include "BearNet/tcp/TcpServer.h"
 #include "BearNet/tcp/TcpAcceptor.h"
-#include "BearNet/codec/Codec.h"
 
 using namespace BearNet;
 
 
-TcpServer::TcpServer(Poller *poller, const std::string& ip, uint16_t port, size_t bufferSize)
+TcpServer::TcpServer(Poller* poller, Codec* codec, size_t bufferSize)
     : m_ptrPoller(poller),
-      m_ptrCodec(new Codec()),
-      m_ip(ip),
-      m_port(port),
+      m_ptrCodec(codec),
+      m_ip(),
+      m_port(0),
       m_bufferSize(bufferSize),
-      m_ptrAcceptor(new TcpAcceptor(m_ptrPoller, m_ip, m_port)) {
+      m_ptrAcceptor(new TcpAcceptor(m_ptrPoller)) {
     m_ptrAcceptor->SetNewConnectionCallBack(std::bind(&TcpServer::_NewConnection, this, std::placeholders::_1));
 }
 
@@ -28,8 +27,10 @@ TcpServer::~TcpServer() {
 }
 
 
-void TcpServer::Start() {
-    m_ptrAcceptor->Listen();
+void TcpServer::Start(const std::string& ip, uint16_t port) {
+    m_ip = ip;
+    m_port = port;
+    m_ptrAcceptor->Listen(m_ip, m_port);
 }
 
 void TcpServer::_NewConnection(int fd) {

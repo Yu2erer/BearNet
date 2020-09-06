@@ -11,24 +11,29 @@ const std::string kCodecTag = "Bear";
 void Codec::Encode(Buffer* buffer, uint16_t cmd, const void* data, int32_t dataSize) {
     buffer->Append(kCodecTag.c_str(), kCodecTagSize);
     int byte_size = 0;
-    const google::protobuf::Message* pb = nullptr;
+    // const google::protobuf::Message* pb = nullptr;
+    // Encode tag, cmd
+    // Encode GetDataSize
+    // Encode new things
 
-    if (data) {
-        pb = reinterpret_cast<const google::protobuf::Message*>(data);
-        byte_size = pb->ByteSizeLong();
-    }
+    // decode tag, cmd, size
+    // decode new things
+    // if (data) {
+    //     pb = reinterpret_cast<const google::protobuf::Message*>(data);
+    //     byte_size = pb->ByteSizeLong();
+    // }
 
-    buffer->AppendToNet(byte_size);
+    buffer->AppendToNet(dataSize);
     buffer->AppendToNet(cmd);
-
-    if (data) {
-        uint8_t* start = reinterpret_cast<uint8_t*>(buffer->GetWritePtr());
-        uint8_t* end = pb->SerializeWithCachedSizesToArray(start);
-        if (end - start != byte_size) {
-            printf("Error\n");
-        }
-        buffer->AppendReadIndex(byte_size);
-    }
+    buffer->Append(data, dataSize);
+    // if (data) {
+    //     uint8_t* start = reinterpret_cast<uint8_t*>(buffer->GetWritePtr());
+    //     uint8_t* end = pb->SerializeWithCachedSizesToArray(start);
+    //     if (end - start != byte_size) {
+    //         printf("Error\n");
+    //     }
+    //     buffer->AppendReadIndex(byte_size);
+    // }
 }
 
 int Codec::Decode(const TcpConnPtr& conn, Buffer* buffer) {
@@ -59,9 +64,12 @@ int Codec::Decode(const TcpConnPtr& conn, Buffer* buffer) {
         printf("不认识 cmd: %d\n", cmd);
     } else {
         auto ptr = cmdCallBack->MakePtr();
-        auto message = std::static_pointer_cast<google::protobuf::Message>(ptr);
-        message->Clear();
-        message->ParseFromString(msg);
+        auto message = std::static_pointer_cast<std::string>(ptr);
+        // auto message = std::static_pointer_cast<google::protobuf::Message>(ptr);
+        // message->Clear();
+        // message->ParseFromString(msg);
+        // cmdCallBack->OnMessage(conn, message);
+        message->assign(msg);
         cmdCallBack->OnMessage(conn, message);
     }
     return 1;

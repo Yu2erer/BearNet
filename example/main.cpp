@@ -5,7 +5,7 @@
 #include "BearNet/poller/EpollPoller.h"
 #include "BearNet/Channel.h"
 #include "BearNet/Buffer.h"
-#include "BearNet/codec/Codec.h"
+#include "RawCodec.h"
 
 #include "example/example.pb.h"
 
@@ -30,17 +30,19 @@ void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) {
     // cout << msg->account() <<endl;
     // cout << msg->password() << endl;
     cout << msg->data() << endl;
-    conn->Send(17, nullptr, 0, 13, 14, 15, "123");
+    conn->Send(17, nullptr, 0);
+    // cout << "A1: " << a1 << " A2: " << a2 << " A3: " << a3 << endl;
 }
 
 int main() {
-
-
+    auto codec = new RawCodec<>();
     std::unique_ptr<Poller> poller(Poller::CreatePoller());
-    std::unique_ptr<Codec> codec(new Codec());
-    TcpServer server(poller.get(), codec.get());
+
+    TcpServer server(poller.get(), codec);
+
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
+
     server.Register<std::string>(16, onCmd16);
 
     server.Start("0.0.0.0", 1234);

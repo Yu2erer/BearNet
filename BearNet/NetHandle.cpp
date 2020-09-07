@@ -15,7 +15,7 @@ void NetHandle::UnRegister(uint16_t cmd) {
     m_cmdCallBack.erase(iter);
 }
 
-const std::shared_ptr<CmdCallBack> NetHandle::GetCmdCallBack(uint16_t cmd) {
+const std::shared_ptr<void> NetHandle::GetCmdCallBack(uint16_t cmd) {
     if (m_cmdCallBack.find(cmd) == m_cmdCallBack.end()) {
         printf("GetCmdCallBack: 未注册 %d\n", cmd);
         return nullptr;

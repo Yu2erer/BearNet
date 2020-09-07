@@ -4,7 +4,7 @@ set(BearNetSrc
     SocketUtils.cpp
     Buffer.cpp
     NetHandle.cpp
-    codec/Codec.cpp
+    codec/InnerCodec.cpp
     poller/Poller.cpp
     poller/EpollPoller.cpp
     tcp/TcpAcceptor.cpp

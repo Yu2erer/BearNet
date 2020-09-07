@@ -2,20 +2,8 @@
 
 #include "BearNet/base/Log.h"
 #include "BearNet/tcp/TcpServer.h"
-#include "BearNet/tcp/TcpAcceptor.h"
 
 using namespace BearNet;
-
-
-TcpServer::TcpServer(Poller* poller, Codec* codec, size_t bufferSize)
-    : m_ptrPoller(poller),
-      m_ptrCodec(codec),
-      m_ip(),
-      m_port(0),
-      m_bufferSize(bufferSize),
-      m_ptrAcceptor(new TcpAcceptor(m_ptrPoller)) {
-    m_ptrAcceptor->SetNewConnectionCallBack(std::bind(&TcpServer::_NewConnection, this, std::placeholders::_1));
-}
 
 
 TcpServer::~TcpServer() {

@@ -18,12 +18,12 @@ void Buffer::Write(size_t size) {
     }
 }
 
-void Buffer::AppendWriteIndex(size_t size) {
+void Buffer::AddReadIndex(size_t size) {
     assert(size <= GetReadSize());
     m_readIndex += size;
 }
 
-void Buffer::AppendReadIndex(size_t size) {
+void Buffer::AddWriteIndex(size_t size) {
     assert(size <= GetWriteSize());
     m_writeIndex += size;
 }
@@ -59,6 +59,19 @@ ssize_t Buffer::ReadFd(int fd) {
         Append(extra, n - writeSize);
     }
     return n;
+}
+
+void Buffer::Prepend(char* where, const char* data, size_t size) {
+    std::copy(data, data + size, where);
+}
+
+void Buffer::Prepend(char* where, const void* data, size_t size) {
+    Prepend(where, static_cast<const char*>(data), size);
+}
+
+void Buffer::PrependToNet(char* where, int32_t x) {
+    int32_t xbe32 = htobe32(x);
+    Prepend(where, &xbe32, sizeof(xbe32));
 }
 
 void Buffer::Append(const char* data, size_t size) {

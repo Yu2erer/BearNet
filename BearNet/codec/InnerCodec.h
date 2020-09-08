@@ -25,11 +25,12 @@ public:
         buffer->Append(kCodecTag.c_str(), kCodecTagSize);
 
         auto codec = static_cast<Codec<T...>*>(m_ptrCodec);
-
-        buffer->AppendToNet(0);
+        char* writePtr = buffer->GetWritePtr();
+        buffer->AddWriteIndex(sizeof(int32_t));
         buffer->AppendToNet(cmd);
-        codec->Encode(buffer, data, dataSize, args...);
+        int32_t newSize = codec->Encode(buffer, data, dataSize, args...);
         // 补 size
+        buffer->PrependToNet(writePtr, newSize);
     }
     // -1 错误, 0 未完整, 1 解包成功
     template <typename... T>
@@ -37,8 +38,9 @@ public:
         if (buffer->GetReadSize() < kCodecHeaderSize) {
             return 0;
         }
-        if (buffer->ReadString(kCodecTagSize) != kCodecTag) {
-            printf("tag failed\n");
+        std::string tag(buffer->ReadString(kCodecTagSize));
+        if (tag != kCodecTag) {
+            printf("tag failed %s\n", tag.c_str());
             return -1;
         }
         int32_t size = buffer->ReadInt32();
@@ -55,15 +57,15 @@ public:
             return -1;
         }
 
-        std::string msg = buffer->ReadString(size);
         auto cmdCallBack = conn->GetCmdCallBack(cmd);
+        // 没注册也要清掉缓冲区 不能影响下一个包
         if (!cmdCallBack) {
             printf("不认识 cmd: %d\n", cmd);
+            buffer->AddReadIndex(size);
             return 1;
         }
         auto codec = static_cast<Codec<T...>*>(m_ptrCodec);
-        int res = codec->Decode(conn, msg, cmdCallBack);
-        return res;
+        return codec->Decode(conn, buffer, size, cmdCallBack);
     }
 
 private:

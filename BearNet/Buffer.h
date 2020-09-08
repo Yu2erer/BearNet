@@ -21,10 +21,15 @@ public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
     // Change ReadIndex
-    void AppendWriteIndex(size_t size);
+    void AddReadIndex(size_t size);
     // Change WriteIndex
-    void AppendReadIndex(size_t size);
+    void AddWriteIndex(size_t size);
 public:
+    // dangerious
+    void Prepend(char* where, const char* data, size_t size);
+    void Prepend(char* where, const void* data, size_t size);
+    void PrependToNet(char* where, int32_t x);
+
     void Append(const char* data, size_t size);
     void Append(const void* data, size_t size);
     void Append(const std::string& data);
@@ -37,6 +42,7 @@ public:
     void AppendToNet(uint16_t x);
     void AppendToNet(int8_t x);
     void AppendToNet(uint8_t x);
+
 public:
     std::string PeekString(size_t size);
     std::string ReadString(size_t size);

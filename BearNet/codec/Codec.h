@@ -12,7 +12,7 @@ struct Codec {
     Codec() = default;
     virtual ~Codec() = default;
     virtual int32_t Encode(Buffer* buffer, const void* data, int32_t dataSize, T... args) = 0;
-    virtual int Decode(const TcpConnPtr& conn, const std::string& msg, const std::shared_ptr<void>& cmdCallBack) = 0;
+    virtual int Decode(const TcpConnPtr& conn, Buffer* buffer, int32_t dataSize, const std::shared_ptr<void>& cmdCallBack) = 0;
 };
 
 

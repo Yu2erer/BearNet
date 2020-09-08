@@ -11,7 +11,8 @@ using namespace BearNet;
 
 void onConnect(const TcpConnPtr& conn) {
     cout << "onConnect" << endl;
-    conn->Send(16, "1234", 4);
+    string sendMsg("aHa 我要飞往天上");
+    conn->Send(16, sendMsg.data(), sendMsg.size());
 }
 
 void onDisconnect(const TcpConnPtr& conn) {
@@ -20,7 +21,8 @@ void onDisconnect(const TcpConnPtr& conn) {
 
 void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) { 
     cout << msg->data() << endl;
-    conn->Send(17, nullptr, 0);
+    string sendMsg("aHa 像那天鸟翱翔");
+    conn->Send(17, sendMsg.c_str(), sendMsg.size());
 }
 
 int main() {

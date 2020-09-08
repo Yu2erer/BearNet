@@ -1,4 +1,9 @@
 # BearNet
+
+<!-- <p align="center"> -->
+<a href="https://github.com/Yu2erer/BearNet/actions?query=workflow%3Abuild"><img src="https://github.com/Yu2erer/BearNet/workflows/build/badge.svg?branch=master"></a>
+<!-- </p> -->
+
 目前是基于 epoll 的 一个 单线程 游戏网络库.
 
 ## Todo

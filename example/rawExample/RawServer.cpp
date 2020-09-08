@@ -1,24 +1,16 @@
 #include <iostream>
-#include <cstring>
 
 #include "BearNet/tcp/TcpServer.h"
 #include "BearNet/poller/EpollPoller.h"
-#include "BearNet/Channel.h"
-#include "BearNet/Buffer.h"
+
 #include "RawCodec.h"
 
-#include "example/example.pb.h"
-
-
-using namespace BearNet;
 using namespace std;
+using namespace BearNet;
 
 
 void onConnect(const TcpConnPtr& conn) {
     cout << "onConnect" << endl;
-    // BearExample::LoginReq req;
-    // req.set_account(1179953947);
-    // req.set_password("bearPass");
     conn->Send(16, "1234", 4);
 }
 
@@ -27,11 +19,8 @@ void onDisconnect(const TcpConnPtr& conn) {
 }
 
 void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) { 
-    // cout << msg->account() <<endl;
-    // cout << msg->password() << endl;
     cout << msg->data() << endl;
     conn->Send(17, nullptr, 0);
-    // cout << "A1: " << a1 << " A2: " << a2 << " A3: " << a3 << endl;
 }
 
 int main() {
@@ -55,11 +44,11 @@ int main() {
             channel->HandleEvent();
         }
 
-        // activeChannelList.clear();
-        // poller->Poll(true, false, activeChannelList, -1);
-        // for (auto channel : activeChannelList) {
-            // channel->HandleEvent();
-        // }
+        activeChannelList.clear();
+        poller->Poll(true, false, activeChannelList, -1);
+        for (auto channel : activeChannelList) {
+            channel->HandleEvent();
+        }
     }
     return 0;
 }

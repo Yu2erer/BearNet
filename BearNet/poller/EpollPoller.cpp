@@ -13,47 +13,27 @@ using namespace BearNet;
 
 // Todo: 将 magic number:16 修改为可配置项
 EpollPoller::EpollPoller() 
-    : m_readEpollfd(::epoll_create1(EPOLL_CLOEXEC)),
-      m_writeEpollfd(::epoll_create1(EPOLL_CLOEXEC)),
-      m_readEvents(16),
-      m_writeEvents(16) {
-    if (m_readEpollfd < 0 || m_writeEpollfd < 0) {
+    : m_epollfd(::epoll_create1(EPOLL_CLOEXEC)),
+      m_events(16) {
+    if (m_epollfd < 0) {
         LogFatal("EpollPoller::EpollPoller()");
     }
 }
 
 EpollPoller::~EpollPoller() {
-    ::close(m_readEpollfd);
-    ::close(m_writeEpollfd);
+    ::close(m_epollfd);
 }
 
-bool EpollPoller::Poll(bool pollWrite, bool pollRead, ChannelList& activeChannels, int timeoutMs) {
-    if (pollWrite) {
-        _Poll(POLLER_TYPE_WRITE, activeChannels, timeoutMs);
-    }
-
-    if (pollRead) {
-        _Poll(POLLER_TYPE_READ, activeChannels, timeoutMs);
-    }
-
+bool EpollPoller::Poll(ChannelList& activeChannels, int timeoutMs) {
+    _Poll(activeChannels, timeoutMs);
     return true;
 }
 
-bool EpollPoller::_Poll(PollerType pollerType, ChannelList& activeChannels, int timeoutMs) {
-    assert(pollerType == POLLER_TYPE_READ || pollerType == POLLER_TYPE_WRITE);
-
+bool EpollPoller::_Poll(ChannelList& activeChannels, int timeoutMs) {
     bool result = false;
 
-    int epollfd = -1;
-    EventList& events = m_readEvents;
-
-    if (pollerType == POLLER_TYPE_READ) {
-        epollfd = m_readEpollfd;
-        events = m_readEvents;
-    } else if (pollerType == POLLER_TYPE_WRITE) {
-        epollfd = m_writeEpollfd;
-        events = m_writeEvents;
-    }
+    int epollfd = m_epollfd;
+    EventList& events = m_events;
 
     int pollCounts = ::epoll_wait(epollfd, events.data(), static_cast<int>(events.size()), timeoutMs);
     int saveErrno = errno;
@@ -140,11 +120,8 @@ void EpollPoller::DeleteChannel(Channel* channel) {
 void EpollPoller::_UpdateEvent(int operation, Channel* channel) {
     assert(operation == EPOLL_CTL_ADD || operation == EPOLL_CTL_MOD || operation == EPOLL_CTL_DEL);
 
-    if (!_CtlEpoll(m_readEpollfd, operation, channel)) {
+    if (!_CtlEpoll(m_epollfd, operation, channel)) {
         printf("EpollPoller::_UpdateEvent() op = %s readEpoll fail. fd: %d\n", _OperationToString(operation), channel->Getfd());
-    }
-    if (!_CtlEpoll(m_writeEpollfd, operation, channel)) {
-        printf("EpollPoller::_UpdateEvent() op = %s writeEpoll fail. fd: %d\n", _OperationToString(operation), channel->Getfd());
     }
 
 }

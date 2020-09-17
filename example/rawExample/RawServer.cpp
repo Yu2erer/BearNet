@@ -41,13 +41,13 @@ int main() {
     Poller::ChannelList activeChannelList;
     for (;;) {
         activeChannelList.clear();
-        poller->Poll(false, true, activeChannelList, -1);
+        poller->Poll(activeChannelList, -1);
         for (auto channel : activeChannelList) {
             channel->HandleEvent();
         }
 
         activeChannelList.clear();
-        poller->Poll(true, false, activeChannelList, -1);
+        poller->Poll(activeChannelList, -1);
         for (auto channel : activeChannelList) {
             channel->HandleEvent();
         }

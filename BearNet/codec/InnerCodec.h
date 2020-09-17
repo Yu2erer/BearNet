@@ -61,7 +61,7 @@ public:
         // 没注册也要清掉缓冲区 不能影响下一个包
         if (!cmdCallBack) {
             printf("不认识 cmd: %d\n", cmd);
-            buffer->AddReadIndex(size);
+            buffer->Write(size);
             return 1;
         }
         auto codec = static_cast<Codec<T...>*>(m_ptrCodec);

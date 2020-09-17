@@ -17,7 +17,7 @@ public:
     Poller() = default;
     virtual ~Poller() = default;
 public:
-    virtual bool Poll(bool pollWrite, bool pollRead, ChannelList& activeChannels, int timeoutMs) = 0;
+    virtual bool Poll(ChannelList& activeChannels, int timeoutMs) = 0;
 
     virtual void UpdateChannel(Channel* channel) = 0;
     virtual void DeleteChannel(Channel* channel) = 0;
@@ -28,13 +28,6 @@ public:
 protected:
     typedef std::map<int, Channel*> ChannelMap;
     ChannelMap m_channels;
-
-protected:
-    enum PollerType {
-        POLLER_TYPE_NULL = 0,
-        POLLER_TYPE_READ = 1,
-        POLLER_TYPE_WRITE = 2,
-    };
 };
 
 

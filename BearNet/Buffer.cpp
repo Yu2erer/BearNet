@@ -18,11 +18,6 @@ void Buffer::Write(size_t size) {
     }
 }
 
-void Buffer::AddReadIndex(size_t size) {
-    assert(size <= GetReadSize());
-    m_readIndex += size;
-}
-
 void Buffer::AddWriteIndex(size_t size) {
     assert(size <= GetWriteSize());
     m_writeIndex += size;

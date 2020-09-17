@@ -20,8 +20,7 @@ public:
 public:
     void Write(size_t size);
     void WriteAll() { m_readIndex = m_writeIndex = 0; }
-    // Change ReadIndex
-    void AddReadIndex(size_t size);
+
     // Change WriteIndex
     void AddWriteIndex(size_t size);
 public:

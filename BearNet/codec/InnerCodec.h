@@ -58,14 +58,17 @@ public:
         }
 
         auto cmdCallBack = conn->GetCmdCallBack(cmd);
+        
         // 没注册也要清掉缓冲区 不能影响下一个包
         if (!cmdCallBack) {
             printf("不认识 cmd: %d\n", cmd);
             buffer->Write(size);
             return 1;
         }
+        auto callBack = std::static_pointer_cast<CmdCallBack<T...>>(cmdCallBack);
+
         auto codec = static_cast<Codec<T...>*>(m_ptrCodec);
-        return codec->Decode(conn, buffer, size, cmdCallBack);
+        return codec->Decode(conn, buffer, size, callBack);
     }
 
 private:

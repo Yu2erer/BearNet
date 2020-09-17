@@ -58,7 +58,7 @@ int main() {
 
     for (;;) {
         activeChannelList.clear();
-        poller->Poll(true, true, activeChannelList, -1);
+        poller->Poll(activeChannelList, -1);
         for (auto channel : activeChannelList) {
             channel->HandleEvent();
         }

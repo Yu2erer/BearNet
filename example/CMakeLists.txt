@@ -1,6 +1,6 @@
-set(RawExampleSrc
-    "rawExample/RawServer.cpp"
+set(RawHeaderSrc
+    "RawHeader/RawServer.cpp"
 )
 
 link_libraries(bearnet)
-add_executable(rawServer ${RawExampleSrc})
+add_executable(RawServer ${RawHeaderSrc})

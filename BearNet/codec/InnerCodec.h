@@ -65,7 +65,7 @@ public:
             buffer->Write(size);
             return 1;
         }
-        auto callBack = std::static_pointer_cast<CmdCallBack<T...>>(cmdCallBack);
+        auto callBack = std::static_pointer_cast<CmdCallBack>(cmdCallBack);
         auto codec = static_cast<Codec<T...>*>(m_ptrCodec);
         
         return codec->Decode(conn, buffer, size, callBack);

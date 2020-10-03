@@ -13,12 +13,12 @@ struct RawCodec : Codec<T...> {
         return dataSize;
     }
 
-    int Decode(const TcpConnPtr& conn, Buffer* buffer, int32_t dataSize, const std::shared_ptr<CmdCallBack<T...>>& callBack) override {
+    int Decode(const TcpConnPtr& conn, Buffer* buffer, int32_t dataSize, const std::shared_ptr<CmdCallBack>& callBack) override {
         auto ptr = callBack->MakePtr();
         auto message = std::static_pointer_cast<std::string>(ptr);
         auto msg = buffer->ReadString(dataSize);
         message->assign(msg);
-        callBack->OnMessage(conn, message, 3);
+        callBack->OnMessage(conn, message);
         return 1;
     }
 };

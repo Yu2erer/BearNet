@@ -18,7 +18,7 @@ void onDisconnect(const TcpConnPtr& conn) {
     std::cout << "onDisconnect" << std::endl;
 }
 
-void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg, int32_t test) { 
+void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) { 
     std::cout << msg->data() << std::endl;
     std::string sendMsg("aHa 像那天鸟翱翔");
     conn->Send(17, sendMsg.c_str(), sendMsg.size());
@@ -36,7 +36,7 @@ int main() {
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
 
-    server.Register<std::string, int32_t>(16, onCmd16);
+    server.Register<std::string>(16, onCmd16);
 
 
     server.Start("0.0.0.0", 1234);

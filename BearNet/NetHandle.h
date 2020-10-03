@@ -14,12 +14,12 @@ public:
     NetHandle() = default;
     virtual ~NetHandle() = default;
 public:
-    template <typename T, typename... PARAM>
-    bool Register(uint16_t cmd, const typename CmdCallBackT<T, PARAM...>::MessageCallBack& callBack) {
+    template <typename T>
+    bool Register(uint16_t cmd, const typename CmdCallBackT<T>::MessageCallBack& callBack) {
         if (m_cmdCallBack.find(cmd) != m_cmdCallBack.end()) {
             return false;
         }
-        std::shared_ptr<CmdCallBackT<T, PARAM...>> callBackPtr(new CmdCallBackT<T, PARAM...>(callBack));
+        std::shared_ptr<CmdCallBackT<T>> callBackPtr(new CmdCallBackT<T>(callBack));
         m_cmdCallBack[cmd] = std::move(callBackPtr);
         return true;
     }

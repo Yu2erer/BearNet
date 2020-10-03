@@ -63,7 +63,6 @@ private:
 template <typename... T>
 void TcpServer::Send(const TcpConnPtr& conn, uint16_t cmd, const void* data, int32_t dataSize, T... args) {
     Buffer buffer;
-    printf("Size: %ld\n",sizeof...(args));
     conn->_GetTcpServer()->GetCodec()->Encode(&buffer, cmd, data, dataSize, args...);
     conn->_Send(&buffer);
 }

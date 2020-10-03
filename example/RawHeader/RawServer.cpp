@@ -5,50 +5,48 @@
 
 #include "RawCodec.h"
 
-using namespace std;
 using namespace BearNet;
 
 
 void onConnect(const TcpConnPtr& conn) {
-    cout << "onConnect" << endl;
-    string sendMsg("aHa 我要飞往天上");
+    std::cout << "onConnect" << std::endl;
+    std::string sendMsg("aHa 我要飞往天上");
     conn->Send(16, sendMsg.data(), sendMsg.size());
 }
 
 void onDisconnect(const TcpConnPtr& conn) {
-    cout << "onDisconnect" << endl;
+    std::cout << "onDisconnect" << std::endl;
 }
 
-void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) { 
-    cout << msg->data() << endl;
-    string sendMsg("aHa 像那天鸟翱翔");
+void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg, int32_t test) { 
+    std::cout << msg->data() << std::endl;
+    std::string sendMsg("aHa 像那天鸟翱翔");
     conn->Send(17, sendMsg.c_str(), sendMsg.size());
 }
 
 int main() {
-    auto codec = new RawCodec<>();
+    std::unique_ptr<RawCodec<int32_t>> codec(new RawCodec<int32_t>());
     std::unique_ptr<Poller> poller(Poller::CreatePoller());
 
-    TcpServer server(poller.get(), codec);
+    TcpServer server(poller.get(), codec.get());
+    
+    // server.SetEncode()...
+    // server.SetDecode()...
 
     server.SetConnectCallBack(onConnect);
     server.SetDisconnectCallBack(onDisconnect);
 
-    server.Register<std::string>(16, onCmd16);
+    server.Register<std::string, int32_t>(16, onCmd16);
+
 
     server.Start("0.0.0.0", 1234);
     
-    Poller::ChannelList activeChannelList;
-    for (;;) {
-        activeChannelList.clear();
-        poller->Poll(activeChannelList, -1);
-        for (auto channel : activeChannelList) {
-            channel->HandleEvent();
-        }
+    Poller::ChannelList channelList;
 
-        activeChannelList.clear();
-        poller->Poll(activeChannelList, -1);
-        for (auto channel : activeChannelList) {
+    for (;;) {
+        channelList.clear();
+        poller->Poll(channelList, -1);
+        for (auto channel : channelList) {
             channel->HandleEvent();
         }
     }

@@ -61,7 +61,6 @@ private:
     TcpServer* m_tcpServer;
     Poller* m_ptrPoller;
     ConnStatus m_state;
-    // 析构的时候 应当 close
     const int m_fd;
     std::unique_ptr<Channel> m_ptrChannel;
     ConnectCallBack m_connectCallBack;

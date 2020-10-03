@@ -15,15 +15,15 @@ public:
     virtual ~NetHandle() = default;
 public:
     template <typename T, typename... PARAM>
-    void Register(uint16_t cmd, const typename CmdCallBackT<T, PARAM...>::MessageCallBack& callBack) {
+    bool Register(uint16_t cmd, const typename CmdCallBackT<T, PARAM...>::MessageCallBack& callBack) {
         if (m_cmdCallBack.find(cmd) != m_cmdCallBack.end()) {
-            printf("Register: 已注册 %d\n", cmd);
-            return;
+            return false;
         }
         std::shared_ptr<CmdCallBackT<T, PARAM...>> callBackPtr(new CmdCallBackT<T, PARAM...>(callBack));
         m_cmdCallBack[cmd] = std::move(callBackPtr);
+        return true;
     }
-    void UnRegister(uint16_t cmd);
+    bool UnRegister(uint16_t cmd);
     const std::shared_ptr<void> GetCmdCallBack(uint16_t cmd);
     // 将所有注册的函数清除
     void Clear();

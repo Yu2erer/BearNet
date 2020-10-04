@@ -20,21 +20,19 @@ make
 首先你需要自定义你的编解码器, 即 codec
 
 ```c++
-// 首先引入头文件
-#include "BearNet/codec/Codec.h"
-// 启用命名空间
-using namespace BearNet;
-// 继承 Codec 这个类, 在编码解码中进行自定义... 具体可见 example
-template <typename... T>
-struct RawCodec : Codec<T...> {
-    int32_t Encode(Buffer* buffer, const void* data, int32_t dataSize, T... args) override {
+int Encode(Buffer* buffer, const void* data, int dataSize) {
+    buffer->Append(data, dataSize);
+    return dataSize;
+}
 
-    }
-
-    int Decode(const TcpConnPtr& conn, Buffer* buffer, int32_t dataSize, const std::shared_ptr<void>& cmdCallBack) override {
-
-    }
-};
+int Decode(const TcpConnPtr& conn, Buffer* buffer, int dataSize, const std::shared_ptr<CmdCallBack<>>& callBack) {
+    auto ptr = callBack->MakePtr();
+    auto message = std::static_pointer_cast<std::string>(ptr);
+    auto msg = buffer->ReadString(dataSize);
+    message->assign(msg);
+    callBack->OnMessage(conn, message);
+    return 1;
+}
 ```
 
 启动 tcpServer 😻
@@ -44,22 +42,27 @@ void onCmd16(const TcpConnPtr& conn, const std::shared_ptr<std::string>& msg) {
     cout << msg->data() << endl;
 }
 int main() {
-    // 绑定 codec
-    auto codec = new RawCodec<>();
     std::unique_ptr<Poller> poller(Poller::CreatePoller());
-    TcpServer server(poller.get(), codec);
+    
+    TcpServer<> server(poller.get());
+    
+    server.SetEncodeFunc(Encode);
+    server.SetDecodeFunc(Decode);
 
-    // 注册消息 std::string 为解码后的类型, 会自动转型作为 onCmd16的参数
+    server.SetConnectCallBack(onConnect);
+    server.SetDisconnectCallBack(onDisconnect);
+
     server.Register<std::string>(16, onCmd16);
-    // 设置启动端口
+
+
     server.Start("0.0.0.0", 1234);
     
-    Poller::ChannelList activeChannelList;
+    Poller::ChannelList channelList;
 
     for (;;) {
-        activeChannelList.clear();
-        poller->Poll(activeChannelList, -1);
-        for (auto channel : activeChannelList) {
+        channelList.clear();
+        poller->Poll(channelList, -1);
+        for (auto channel : channelList) {
             channel->HandleEvent();
         }
     }

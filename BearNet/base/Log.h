@@ -6,9 +6,6 @@
 
 namespace BearNet {
 
-
-// Logger* g_logger;
-
 #define __FILENAME__ (strrchr(__FILE__, '/') + 1)
 
 #define LogFatal(format, ...) \
@@ -26,22 +23,6 @@ namespace BearNet {
 
 #define LogDebug(format, ...) printf("[%s][%s][%d]: " format "\n", __FILENAME__, __FUNCTION__,\
                             __LINE__, ##__VA_ARGS__)
-
-// #define LogError(format, ...) \
-//     g_logger->WriteLogger();
-
-// class Logger {
-// public:
-//   enum LogLevel {
-//     TRACE,
-//     DEBUG,
-//     INFO,
-//     ERROR,
-//     NUM_LOG_LEVELS,
-//   };
-//     static void InitLogger();
-//     void WriteLogger(LogLevel level, );
-// };
 
 }
 

@@ -1,34 +1,10 @@
 #include <assert.h>
 
 #include "BearNet/tcp/TcpConn.h"
-#include "BearNet/Channel.h"
-#include "BearNet/base/Log.h"
 #include "BearNet/tcp/TcpServer.h"
 
 using namespace BearNet;
 
-
-TcpConn::TcpConn(TcpServer* tcpServer, const int fd, size_t bufferSize)
-    : m_tcpServer(tcpServer),
-      m_ptrPoller(tcpServer->GetPoller()),
-      m_state(kConnecting),
-      m_fd(fd),
-      m_ptrChannel(new Channel(m_fd, m_ptrPoller)),
-      m_recvBuf(bufferSize),
-      m_sendBuf(bufferSize) {
-
-    static uint64_t id = 0;
-    m_id = ++ id;
-
-    SocketUtils::SetKeepAlive(m_fd);
-
-    m_ptrChannel->SetReadCallBack(std::bind(&TcpConn::_HandleRead, this));
-    m_ptrChannel->SetWriteCallBack(std::bind(&TcpConn::_HandleWrite, this));
-    m_ptrChannel->SetCloseCallBack(std::bind(&TcpConn::_HandleClose, this));
-    m_ptrChannel->SetErrorCallBack(std::bind(&TcpConn::_HandleError, this));
-    
-    LogTrace("TcpConn::TcpConn");
-}
 
 TcpConn::~TcpConn() {
     assert(m_state == kDisconnected);
@@ -68,14 +44,9 @@ void TcpConn::ShutDown() {
         SocketUtils::Shutdown(m_fd);
     }
 }
-
-void TcpConn::Send(uint16_t cmd) {
-    TcpServer::Send(shared_from_this(), cmd);
-}
-
-void TcpConn::Send(uint16_t cmd, const void* data, int32_t dataSize) {
-    TcpServer::Send(shared_from_this(), cmd, data, dataSize);
-}
+// void TcpConn::Send(uint16_t cmd, const void* data, int32_t dataSize) {
+//     TcpServer::Send(shared_from_this(), cmd, data, dataSize);
+// }
 
 const std::shared_ptr<void> TcpConn::GetCmdCallBack(uint16_t cmd) const {
     return _GetTcpServer()->GetCmdCallBack(cmd);
